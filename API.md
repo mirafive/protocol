@@ -234,10 +234,13 @@ Only the listed features are bundled (generated virtual module). Auto-imports
 
 ### `@mirafive/sdk-astro`
 
-`integrations: [mirafive({ key, host, mode, features })]` bundles sdk-browser into the
-site's own JS (no third-party script). Off in `astro dev` unless `dev: true`.
-`@mirafive/sdk-astro/server`: `miraFlagsFor(context, unit)`, `MiraFlagsScript`
-component.
+`integrations: [mirafive({ key, host, mode, features, dev, trackLocalhost })]` (named and
+default export, so `astro add @mirafive/sdk-astro` works) bundles sdk-browser into the
+site's own JS (no third-party script); key defaults to `PUBLIC_MIRAFIVE_KEY`. Off in
+`astro dev` unless `dev: true`. `@mirafive/sdk-astro/client`: `mirafive(verb, ...args)`
+(same verbs as the tracker, `anonymousId` with a callback too; also `window.mirafive`),
+`astro()` plugin (holds pageviews across view transitions). `@mirafive/sdk-astro/server`:
+`miraFlagsFor(context, unit, { waitUntil? })`, `MiraFlagsScript` component.
 
 ### `@mirafive/sdk-convex`
 
