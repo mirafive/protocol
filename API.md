@@ -172,11 +172,13 @@ const flags = new MiraFlags({
   fetch?, waitUntil?, onError?,
 })
 
-const user = await flags.for({ userId?, anonymousId?, properties?, consent?: { experiments?, targeting? } })
+const user = await flags.for({ userId?, anonymousId?, properties?, consent?: { experiments?, targeting? }, optedOut? },
+                            { waitUntil? })   // per-call waitUntil: keep one MiraFlags per isolate on Workers
 user.enabled("new-checkout")         // boolean
 user.variant("pricing-test")         // string
 user.config("limits", { max: 3 })    // typed remote config
-user.evaluate("pricing-test")        // { variant, reason, rule? } | { reason: "ERROR", errorCode: "UNSUPPORTED" | "NOT_READY" | "FLAG_NOT_FOUND" | "MEMBERSHIP_UNAVAILABLE" | "NOT_ALLOWED" }
+user.evaluate("pricing-test")        // { variant, reason, rule?, errorCode? } — NOT_ALLOWED / MEMBERSHIP_UNAVAILABLE serve the default
+                                     // variant with an errorCode (FLAGS §5.1); { reason: "ERROR", errorCode: "UNSUPPORTED" | "NOT_READY" | "FLAG_NOT_FOUND" } has none
 user.bootstrap()                     // HTML <script type="application/json" id="mirafive-flags">…</script>, escaped
 await flags.ready(); flags.snapshot(); flags.status()
 ```

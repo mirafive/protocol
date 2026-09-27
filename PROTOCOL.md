@@ -164,7 +164,8 @@ batch = UUIDv8( SHA-256( "mirafive:batch:" ‖ key ) )
 where `key` is a non-empty string encoded as UTF-8, taking the first 16 bytes of the digest, then setting the version nibble to `8`
 (`bytes[6] = bytes[6] & 0x0f | 0x80`) and the variant to `10xx`
 (`bytes[8] = bytes[8] & 0x3f | 0x80`). Test vectors are in
-`fixtures/batch-id.cases.json`.
+`fixtures/batch-id.cases.json` (its empty-key case only pins the hash; SDKs refuse an
+empty key).
 
 ### Errors
 
