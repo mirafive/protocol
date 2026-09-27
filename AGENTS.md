@@ -30,3 +30,7 @@ bun run test        # vitest
 - A new module needs an entry in `tsdown.config.ts`, `package.json#exports`,
   `src/index.ts` and the README table.
 - Do not run git write commands unless asked; the maintainer commits.
+
+## Releasing
+
+To release, bump `version` in `package.json`, add a `## X.Y.Z — YYYY-MM-DD` section to `CHANGELOG.md`, commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`. `.github/workflows/release.yml` checks both, runs `bun run check` and creates the GitHub release. The package is private and never goes to npm.
