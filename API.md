@@ -226,7 +226,8 @@ the bootstrap value during SSR and hydration, so both renders match.
 
 ### `@mirafive/sdk-vue`
 
-`app.use(createMiraPlugin(client))`, `useMira()`, `useFlag(key, fallback)` and
+`app.use(createMiraPlugin(client | undefined, { bootstrap? }))` (undefined on the server;
+`bootstrap` as object or the string from `bootstrap()`), `useMira()`, `useFlag(key, fallback)` and
 `useFlagConfig(key, fallback)` returning refs.
 
 ### `@mirafive/sdk-nuxt`
@@ -234,7 +235,9 @@ the bootstrap value during SSR and hydration, so both renders match.
 Module config key `mirafive`: `{ key, host, mode, features: ("autocapture" | "search" | "flags" | "experiments")[], secretKey }`.
 Only the listed features are bundled (generated virtual module). Auto-imports
 `useMira`, `useFlag`, `useFlagConfig`; server utils `useServerMira(event)`,
-`miraFlagsFor(event, unit)`; bootstrap written to the head with no-store headers.
+`miraFlagsFor(event, unit)`; bootstrap written to the head with no-store headers; a
+server middleware may set `event.context.mirafive = { userId, … }` to name the visitor
+for that bootstrap.
 
 ### `@mirafive/sdk-astro`
 
