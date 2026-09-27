@@ -1,6 +1,6 @@
 {
   "name": "@mirafive/protocol",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "private": true,
   "description": "The MIRA FIVE wire contract: types, limits, flag evaluation, batch ids and URL cleaning, with conformance fixtures.",
   "homepage": "https://mirafive.io",

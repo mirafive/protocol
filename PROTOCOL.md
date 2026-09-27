@@ -60,7 +60,7 @@ Website keys are checked against the source's allowed origins (`Origin` header;
   "mode": "full",
   "sentAt": 1727430000000,
   "context": {
-    "sdk": "mirafive-browser/0.5.0",
+    "sdk": "mirafive-browser/1.0.0",
     "locale": "de-DE",
     "timezone": "Europe/Berlin",
     "screen": [1512, 982]
@@ -86,7 +86,7 @@ Website keys are checked against the source's allowed origins (`Origin` header;
 | `mode` | string | REQUIRED, `"consentless"` or `"full"` (§4) |
 | `sentAt` | integer | OPTIONAL, epoch milliseconds when the request left the device; stored, and used as the time of events without `time` |
 | `context` | object | OPTIONAL, shared by every event in the batch |
-| `context.sdk` | string | `name/version`, name ≤ 64, version ≤ 32 characters, e.g. `mirafive-server/0.5.0` |
+| `context.sdk` | string | `name/version`, name ≤ 64, version ≤ 32 characters, e.g. `mirafive-server/1.0.0` |
 | `context.locale` | string | BCP 47, 2–35 characters. **Full only** |
 | `context.timezone` | string | IANA name, ≤ 64 characters. **Full only** |
 | `context.screen` | `[width, height]` | integers 0–32768. **Full only** |

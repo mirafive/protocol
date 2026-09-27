@@ -35,7 +35,7 @@ describe("batch schema", () => {
         v: 1,
         batch: "0192d4a8-7b1c-4e8a-9c1d-2b3e4f5a6b7c",
         mode: "consentless",
-        context: { sdk: "mirafive-server/0.5.0" },
+        context: { sdk: "mirafive-server/1.0.0" },
         events: [{ name: "$identify", unknownHint: true }]
       })
     ).toBe(true)

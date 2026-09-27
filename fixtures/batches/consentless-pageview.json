@@ -4,7 +4,7 @@
     "mode": "consentless",
     "sentAt": 1727430000000,
     "context": {
-        "sdk": "mirafive-tracker/0.5.0"
+        "sdk": "mirafive-tracker/1.0.0"
     },
     "events": [
         {

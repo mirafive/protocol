@@ -1,4 +1,4 @@
-# MIRA FIVE SDK family — public API contract (0.5.0)
+# MIRA FIVE SDK family — public API contract (1.0.0)
 
 Every package implements exactly this surface. Changing it means changing this file
 first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
