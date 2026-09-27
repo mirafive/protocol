@@ -109,6 +109,12 @@ Attributes: `data-key` (required), `data-host`, `data-mode="full"`, `data-hash`,
 `data-manual` (no automatic pageviews), `data-autocapture`, `data-site-search`
 (bare or a comma list of parameters), `data-flags`, `data-track-localhost`.
 
+Until a chunk arrives: `track`, `pageview` and `flush` issued after a consent grant wait
+for identity and replay in order; `flag`/`config` return the fallback and are not replayed
+(a replayed read would count an exposure the page never showed) — read flags inside the
+`flags` listener; `search` without `data-site-search` does nothing. The flags chunk needs
+`Object.hasOwn` (Safari 15.4+).
+
 Verbs on `mirafive(verb, ...args)`: `track`, `pageview`, `flush`, `consent`,
 `identify`, `reset`, `anonymousId` (callback as last argument), `search`, `flag`,
 `config`, `flags` (listener), `flagProperties`. Unknown verbs warn in development.
@@ -118,11 +124,11 @@ chunks from its own origin, content-hashed and with SRI, only when needed:
 
 | Chunk | Loaded when |
 |---|---|
-| identity | `data-mode="full"`, on the first consent grant (or a pre-set `__mirafive_consent`) |
+| identity | `data-mode="full"`, on the first consent grant (or a pre-set granting `__mirafive_consent`); a decline loads it only when ids from an earlier visit must be forgotten |
 | autocapture | `data-autocapture` |
 | search | `data-site-search` in full mode, after consent |
 | flags | `data-flags`, the first flag verb, a flag bootstrap block, or a snippet decision |
-| experiments | `window.__mirafive_experiments` is non-empty |
+| experiments | full mode, and `window.__mirafive_experiments` is non-empty |
 
 Build output: `dist/mira.js`, `dist/mira.<hash>.js` (pinned copy),
 `dist/chunks/<feature>.<hash>.js`, `dist/manifest.json` (`{ file, integrity }` of the
