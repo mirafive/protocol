@@ -394,8 +394,13 @@ Sent only when all hold:
   until then and dropped on a decline), and evaluating again under the id it is counted
   under still gives the same variant.
 
+On a server, generating a bootstrap for a unit counts as reading every marked
+`c: "s"` experiment it contains: the page is handed the value, and the browser never
+counts `c: "s"`.
+
 Deduplication: a browser sends at most one exposure per flag per page load; a server
-at most one per flag, variant and unit per hour.
+at most one per flag, variant and unit per hour — across requests and processes, so a
+server SDK keeps its marks in a shared cache when it has one (PHP under FPM).
 
 ## 6. Page experiments
 
