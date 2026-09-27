@@ -20,6 +20,10 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
   `createMira<Events>()` / `new Mira<Events>()` where
   `Events extends Record<string, Record<string, unknown> | undefined>` narrows
   `track(name, properties)`.
+- Server-side flag reads honour the visitor's opt-out: framework integrations read
+  `Sec-GPC: 1` / `DNT: 1` from the incoming request and pass `optedOut`.
+- The tracker's mode (`script_mode`, default `consentless`) is configured separately
+  from server events (`mode`, default `full`): a consentless site needs no banner.
 - Nothing throws for transport reasons. Browser: warn once in development
   (`location.hostname` is local) and drop. Server: `onError(error)` callback, and
   `send()` rejects with `MiraError`.
@@ -250,7 +254,8 @@ $mira = new Mira(key: getenv('MIRAFIVE_SECRET_KEY'), host: null, mode: Mode::Ful
 $mira->track('signup', userId: 'u_42', properties: ['plan' => 'pro']);
 $mira->identify('u_42', ['plan' => 'pro']);
 $receipt = $mira->send([...events], idempotencyKey: 'order-981');
-$mira->flush();   // also runs on shutdown
+$mira->flush();   // also runs on shutdown unless flushOnShutdown: false
+// handOff: fn (array $wireBody) => …  replaces delivery for buffered flushes (queues, Messenger)
 
 $flags = $mira->flags();                       // MiraFive\Flags\MiraFlags, document cached (PSR-16 optional)
 $user  = $flags->for(userId: 'u_42', properties: ['plan' => 'pro'],
@@ -261,8 +266,10 @@ $user->bootstrap();                            // escaped <script> block
 
 ### `mirafive/sdk-laravel`
 
-Auto-discovered provider; `config/mirafive.php` (`secret_key`, `website_key`, `host`,
-`mode`, `queue`); `MiraFive\Laravel\Facades\Mira`; flush on `terminating`; optional
+Auto-discovered provider; `config/mirafive.php` (`enabled`, `secret_key`, `website_key`,
+`host`, `mode`, `script_mode`, `script_url`, `queue` as `queue` or `connection:queue`,
+`flags.refresh_seconds`, `flags.cache_store`); `mirafive:check` artisan command;
+`Mira::forUser($user)`, `Mira::optedOut($request)`; `MiraFive\Laravel\Facades\Mira`; flush on `terminating`; optional
 queued delivery (`MIRAFIVE_QUEUE`); Blade `@mirafiveScript` (tracker tag with the
 website key) and `@mirafiveFlags($unit)`; `Mira::fake()` for tests with
 `assertTracked()`.
@@ -271,4 +278,5 @@ website key) and `@mirafiveFlags($unit)`; `Mira::fake()` for tests with
 
 `MiraFive\Symfony\MiraFiveBundle`; config `mirafive: { secret_key, website_key, host, mode }`;
 autowired `MiraFive\Mira` and `MiraFlags`; flush on `kernel.terminate`
-(and `console.terminate`); Twig `mirafive_script()` and `mirafive_flags(unit)`.
+(and `console.terminate`); Twig `mirafive_script()` and `mirafive_flags(unit)`; config also takes `script_mode`;
+`mirafive:check` console command.
