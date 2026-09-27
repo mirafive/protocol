@@ -23,6 +23,9 @@ never stored. A key without `_` has the namespace `default`.
 
 - A secret key MUST NOT be shipped to a browser. The server marks a secret key that
   arrives with an `Origin` or `Sec-Fetch-Site` header as exposed.
+- Ingest still accepts a batch sent with an exposed secret key (so a leak shows up in the
+  dashboard rather than as silent data loss); the flag endpoints refuse it
+  (`403 secret_key_exposed`).
 - A website key sent as a bearer is refused (`403 website_key_as_bearer`); a secret
   key in a URL path is refused (`403 secret_key_in_path`).
 
@@ -81,9 +84,9 @@ Website keys are checked against the source's allowed origins (`Origin` header;
 | `v` | integer | REQUIRED, `1` |
 | `batch` | string | REQUIRED, a UUID (any version). The batch's identity: see §5 |
 | `mode` | string | REQUIRED, `"consentless"` or `"full"` (§4) |
-| `sentAt` | integer | OPTIONAL, epoch milliseconds when the request left the device; used to correct clock skew |
+| `sentAt` | integer | OPTIONAL, epoch milliseconds when the request left the device; stored, and used as the time of events without `time` |
 | `context` | object | OPTIONAL, shared by every event in the batch |
-| `context.sdk` | string | `name/version`, optionally followed by a space and a framework token; name ≤ 64, the rest ≤ 32 characters, e.g. `mirafive-server/0.5.0`, `mirafive-browser/0.5.0 react` |
+| `context.sdk` | string | `name/version`, name ≤ 64, version ≤ 32 characters, e.g. `mirafive-server/0.5.0` |
 | `context.locale` | string | BCP 47, 2–35 characters. **Full only** |
 | `context.timezone` | string | IANA name, ≤ 64 characters. **Full only** |
 | `context.screen` | `[width, height]` | integers 0–32768. **Full only** |

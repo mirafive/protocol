@@ -8,9 +8,8 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
 
 - Default host `https://events.mirafive.io`. A host without a scheme is an error.
 - SDK identity in `context.sdk`: `mirafive-browser`, `mirafive-tracker`,
-  `mirafive-server`, `mirafive-php`, plus framework packages identify as the
-  underlying SDK with a suffix, e.g. `mirafive-browser/0.5.0 react`. Not allowed: a
-  framework package inventing its own transport.
+  `mirafive-server`, `mirafive-php`. Framework packages report the SDK they run on,
+  unchanged, and never invent their own transport.
 - Env var names: `MIRAFIVE_SECRET_KEY`, `MIRAFIVE_WEBSITE_KEY`, `MIRAFIVE_HOST`; public
   prefixes per framework (`NEXT_PUBLIC_MIRAFIVE_KEY`, `VITE_MIRAFIVE_KEY`,
   `PUBLIC_MIRAFIVE_KEY`, `NUXT_PUBLIC_MIRAFIVE_KEY`).
