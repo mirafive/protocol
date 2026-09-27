@@ -199,7 +199,8 @@ All are thin: no transport, no evaluator of their own. Peers:
 
 ### `@mirafive/sdk-react`
 
-`<MiraProvider client={mira}>` (client from `createMira`), `useMira()`,
+`<MiraProvider client={mira} bootstrap?={…}>` (client from `createMira`; `bootstrap` is the
+object or string the server rendered, so hooks match during hydration), `useMira()`,
 `useFlag(key, fallback)`, `useFlagConfig(key, fallback)`,
 `useTrackOnMount(name, properties?)`. Flag hooks use `useSyncExternalStore` and return
 the bootstrap value during SSR and hydration, so both renders match.
@@ -207,16 +208,19 @@ the bootstrap value during SSR and hydration, so both renders match.
 ### `@mirafive/sdk-next`
 
 - `@mirafive/sdk-next` (client, `"use client"`): `MiraProvider`
-  (`key`/`mode`/`plugins` props, creates the client once), re-exports the sdk-react
-  hooks.
+  (`websiteKey` — React reserves `key` — default `NEXT_PUBLIC_MIRAFIVE_KEY`, `host`,
+  `mode`, `plugins`, `bootstrap`; creates the client once and adds `pageviews()` unless
+  `plugins` has one), re-exports the sdk-react hooks. Flags or full mode need a small
+  `"use client"` providers file, since plugins are functions.
 - `@mirafive/sdk-next/server`: `mira()` (a process-wide `Mira` from env, flushed via
   `after()`), `flagsFor(unit)` (reads `Sec-GPC`/`DNT` via `next/headers`),
   `<MiraFlagsScript flags={…} />` (bootstrap block).
 
 ### `@mirafive/sdk-tanstack`
 
-- `@mirafive/sdk-tanstack`: `MiraProvider`, re-exported sdk-react hooks.
-- `@mirafive/sdk-tanstack/start`: `miraMiddleware()` (TanStack Start request
+- `@mirafive/sdk-tanstack`: `MiraProvider` (`websiteKey` required, e.g.
+  `import.meta.env.VITE_MIRAFIVE_KEY`; same props as Next), re-exported sdk-react hooks.
+- `@mirafive/sdk-tanstack/start`: `miraMiddleware({ key?, host?, waitUntil? })` (TanStack Start request
   middleware: puts `mira` and `flagsFor` on `context`, flushes after the response),
   `MiraFlagsScript`.
 
