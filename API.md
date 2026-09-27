@@ -181,7 +181,7 @@ const flags = new MiraFlags({
 const user = await flags.for({ userId?, anonymousId?, properties?, consent?: { experiments?, targeting? }, optedOut? },
                             { waitUntil? })   // per-call waitUntil: keep one MiraFlags per isolate on Workers
 user.enabled("new-checkout")         // boolean
-user.variant("pricing-test")         // string
+user.variant("pricing-test", "a")    // string (undefined without a fallback on an error)
 user.config("limits", { max: 3 })    // typed remote config
 user.evaluate("pricing-test")        // { variant, reason, rule?, errorCode? } — NOT_ALLOWED / MEMBERSHIP_UNAVAILABLE serve the default
                                      // variant with an errorCode (FLAGS §5.1); { reason: "ERROR", errorCode: "UNSUPPORTED" | "NOT_READY" | "FLAG_NOT_FOUND" } has none
