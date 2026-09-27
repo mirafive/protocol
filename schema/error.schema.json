@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mirafive.io/schema/v1/error.schema.json",
+  "title": "MIRA FIVE error body",
+  "description": "PROTOCOL.md §5 and FLAGS.md §2.5. Codes are open-ended: an SDK decides retries by status, not by code.",
+  "type": "object",
+  "required": ["code", "detail"],
+  "properties": {
+    "code": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "detail": { "type": "string" },
+    "errors": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["path", "message"],
+        "properties": {
+          "path": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+    "v": 1,
+    "batch": "0192d4a8-7b1c-4e8a-9c1d-2b3e4f5a6b7c",
+    "mode": "consentless",
+    "events": [
+        {
+            "name": "$pageview",
+            "page": { "url": "https://shop.example/" },
+            "anonymousId": "5f0c1c8e-3e0e-4a57-9d59-3f7f2a6d1e44"
+        }
+    ]
+}

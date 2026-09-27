@@ -1,0 +1,25 @@
+{
+    "v": 1,
+    "batch": "01925f3a-2c4b-7d6e-8f90-a1b2c3d4e5f6",
+    "mode": "full",
+    "context": {
+        "sdk": "mirafive-server/0.5.0"
+    },
+    "events": [
+        {
+            "name": "signup",
+            "id": "01925f3a-2c4b-7d6e-8f90-000000000001",
+            "time": 1727430100000,
+            "userId": "u_42",
+            "anonymousId": "5f0c1c8e-3e0e-4a57-9d59-3f7f2a6d1e44",
+            "properties": { "plan": "pro" }
+        },
+        {
+            "name": "$identify",
+            "id": "01925f3a-2c4b-7d6e-8f90-000000000002",
+            "time": 1727430100001,
+            "userId": "u_42",
+            "properties": { "plan": "pro", "company": "Example GmbH" }
+        }
+    ]
+}

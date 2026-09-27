@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mirafive.io/schema/v1/receipt.schema.json",
+  "title": "MIRA FIVE batch receipt (202)",
+  "description": "PROTOCOL.md §5. A 202 is final: never retried.",
+  "type": "object",
+  "required": ["batch", "accepted", "dropped"],
+  "properties": {
+    "batch": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "accepted": { "type": "integer", "minimum": 0 },
+    "dropped": { "type": "integer", "minimum": 0 },
+    "reason": { "enum": ["bot", "install_check", "ingestion_paused", "allowance_exhausted"] }
+  }
+}

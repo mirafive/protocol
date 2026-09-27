@@ -1,0 +1,52 @@
+{
+  "name": "@mirafive/protocol",
+  "version": "0.5.0",
+  "private": true,
+  "description": "The MIRA FIVE wire contract: types, limits, flag evaluation, batch ids and URL cleaning, with conformance fixtures.",
+  "homepage": "https://mirafive.io",
+  "license": "MIT",
+  "author": "MIRA FIVE <support@mirafive.io>",
+  "repository": "github:mirafive/protocol",
+  "files": [
+    "dist",
+    "src",
+    "schema",
+    "fixtures"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./types": "./dist/types.js",
+    "./limits": "./dist/limits.js",
+    "./key": "./dist/key.js",
+    "./hash": "./dist/hash.js",
+    "./evaluate": "./dist/evaluate.js",
+    "./batch-id": "./dist/batch-id.js",
+    "./clean-url": "./dist/clean-url.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "ajv": "^8.20.0",
+    "oxfmt": "^0.70.0",
+    "oxlint": "^1.85.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "bun@1.4.2"
+}
