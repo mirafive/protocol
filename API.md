@@ -255,7 +255,8 @@ $mira->track('signup', userId: 'u_42', properties: ['plan' => 'pro']);
 $mira->identify('u_42', ['plan' => 'pro']);
 $receipt = $mira->send([...events], idempotencyKey: 'order-981');
 $mira->flush();   // also runs on shutdown unless flushOnShutdown: false
-// handOff: fn (array $wireBody) => …  replaces delivery for buffered flushes (queues, Messenger)
+// handOff: fn (string $body, string $batchId) => …  replaces delivery for buffered flushes;
+// a worker then calls $mira->deliverPrepared($body). Also: enabled:, flushOnShutdown:, flagsRefreshSeconds:
 
 $flags = $mira->flags();                       // MiraFive\Flags\MiraFlags, document cached (PSR-16 optional)
 $user  = $flags->for(userId: 'u_42', properties: ['plan' => 'pro'],
