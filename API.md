@@ -235,11 +235,16 @@ component.
 
 ### `@mirafive/sdk-convex`
 
-`new MiraConvex({ key, host?, outbox?: boolean, enqueue?, disabled? })`:
-`track(ctx, name, options)`, `identify(ctx, userId, traits?)` from mutations and
-actions; `deliverAction()` (internal action delivering one batch), `miraOutboxTable`,
-`flushOutbox()` for a cron. A mutation never sends; it schedules (`runAfter(0)`) or
-writes to the outbox, so rolled-back events are never sent.
+`new MiraConvex({ deliver, key?, host?, mode?, outbox?: boolean, enqueue?, disabled? })`
+where `deliver` is the customer's exported internal action reference:
+`track(ctx, name, options)`, `trackMany(ctx, events)`,
+`identify(ctx, userId, traits?, { anonymousId? })` from mutations and actions;
+`deliverAction()` (the internal action delivering one batch), `miraOutboxTable`
+(table `miraOutbox`), and `flushOutbox()` returning `{ flushOutbox, outboxRows }`,
+both exported next to `deliver` and drained by a cron. A mutation never sends; it
+schedules (`runAfter(0)`) or writes to the outbox, so rolled-back events are never
+sent. The delivery action throws on failure (Convex logs, workpool retries); `track`
+calls never throw for transport reasons.
 
 ## PHP
 
