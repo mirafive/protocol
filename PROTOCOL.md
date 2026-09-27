@@ -102,6 +102,9 @@ Website keys are checked against the source's allowed origins (`Origin` header;
 | `userId` | string | OPTIONAL, 1–256 characters, not blank. **Full only** |
 | `sessionId` | string | OPTIONAL UUID. **Full only** |
 
+Lengths are counted by the server in Unicode code points. SDKs MAY count UTF-16 code
+units instead, which is never more permissive.
+
 Unknown fields MUST be ignored by the server, so SDKs can add hints without breaking
 older servers. SDKs MUST NOT rely on that to send data the protocol does not define.
 

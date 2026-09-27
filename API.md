@@ -25,7 +25,9 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
   (`location.hostname` is local) and drop. Server: `onError(error)` callback, and
   `send()` rejects with `MiraError`.
 - `MiraError { code, status?, retryable, retryAfterMs?, errors? }` with codes from
-  PROTOCOL §5 plus `network_error`, `timeout`, `aborted`, `invalid_event`.
+  PROTOCOL §5 plus `network_error`, `timeout`, `aborted`, `invalid_event`, and
+  `unexpected` for a non-2xx answer without a code (e.g. a bare 502 from a proxy).
+  In PHP the string code is `$error->errorCode` and `getCode()` is the HTTP status.
 
 ## `@mirafive/sdk-browser`
 
@@ -252,7 +254,8 @@ $receipt = $mira->send([...events], idempotencyKey: 'order-981');
 $mira->flush();   // also runs on shutdown
 
 $flags = $mira->flags();                       // MiraFive\Flags\MiraFlags, document cached (PSR-16 optional)
-$user  = $flags->for(userId: 'u_42', properties: ['plan' => 'pro']);
+$user  = $flags->for(userId: 'u_42', properties: ['plan' => 'pro'],
+                     consent: ['experiments' => true, 'targeting' => false], optedOut: false);
 $user->enabled('new-checkout'); $user->variant('pricing-test'); $user->config('limits', []);
 $user->bootstrap();                            // escaped <script> block
 ```
