@@ -100,11 +100,13 @@ Website keys are checked against the source's allowed origins (`Origin` header;
 | `time` | integer | OPTIONAL, epoch ms when it happened. Absent: `sentAt`, else the time received. Far-future and far-past times are clamped by the server |
 | `id` | string | OPTIONAL UUID, unique within the batch. Absent: the server derives a stable id from `batch`, the index and `time` |
 | `page` | object | OPTIONAL: `url` ≤ 2048, `title` ≤ 512, `referrer` ≤ 2048 characters |
-| `properties` | object | OPTIONAL. JSON object, ≤ 32 KB encoded, ≤ 64 leaf values, depth ≤ 5, keys ≤ 128 characters. `revenue` (number) and `currency` (ISO 4217) have meaning |
+| `properties` | object | OPTIONAL. JSON object, ≤ 32 KB as UTF-8 JSON (no escaping of `/` or non-ASCII; an SDK that counts the escaped form is merely stricter), ≤ 64 leaf values, depth ≤ 5, keys ≤ 128 characters. `revenue` (number) and `currency` (ISO 4217) have meaning |
 | `anonymousId` | string | OPTIONAL, 1–256 characters, not blank. **Full only** |
 | `userId` | string | OPTIONAL, 1–256 characters, not blank. **Full only** |
 | `sessionId` | string | OPTIONAL UUID. **Full only** |
 
+Strings MUST be well-formed UTF-16 before encoding: truncating in the middle of a
+surrogate pair produces JSON the server refuses as a whole (`400 invalid_json`).
 Lengths are counted by the server in Unicode code points. SDKs MAY count UTF-16 code
 units instead, which is never more permissive.
 
