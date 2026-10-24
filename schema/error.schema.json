@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mirafive.io/schema/v1/error.schema.json",
   "title": "MIRA FIVE error body",
-  "description": "PROTOCOL.md §5 and FLAGS.md §2.5. Codes are open-ended: an SDK decides retries by status, not by code.",
+  "description": "PROTOCOL.md §5. Codes are open-ended: an SDK decides retries by status, not by code.",
   "type": "object",
   "required": ["code", "detail"],
   "properties": {

@@ -22,9 +22,6 @@ export const MAX_PROPERTY_LEAVES = 64
 export const MAX_PROPERTY_DEPTH = 5
 export const MAX_PROPERTY_KEY_LENGTH = 128
 
-export const MAX_LOOKUP_UNITS = 100
-export const MAX_LOOKUP_BODY_BYTES = 1024
-
 export const RESERVED_NAMES = [
   "$pageview",
   "$autocapture",
@@ -34,7 +31,7 @@ export const RESERVED_NAMES = [
   "$exposure"
 ] as const
 
-export const FULL_ONLY_NAMES = ["$identify", "$search", "$exposure"] as const
+export const FULL_ONLY_NAMES = ["$identify", "$search"] as const
 
 export const KEPT_QUERY_PARAMETERS = [
   "ref",

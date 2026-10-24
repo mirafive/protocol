@@ -6,8 +6,6 @@ export default defineConfig({
     "src/types.ts",
     "src/limits.ts",
     "src/key.ts",
-    "src/hash.ts",
-    "src/evaluate.ts",
     "src/batch-id.ts",
     "src/clean-url.ts"
   ],

@@ -1,8 +1,7 @@
 # MIRA FIVE SDK family — public API contract (1.0.0)
 
 Every package implements exactly this surface. Changing it means changing this file
-first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
-[FLAGS.md](FLAGS.md).
+first. Wire details are in [PROTOCOL.md](PROTOCOL.md).
 
 ## Shared rules
 
@@ -20,8 +19,6 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md), flag semantics in
   `createMira<Events>()` / `new Mira<Events>()` where
   `Events extends Record<string, Record<string, unknown> | undefined>` narrows
   `track(name, properties)`.
-- Server-side flag reads honour the visitor's opt-out: framework integrations read
-  `Sec-GPC: 1` / `DNT: 1` from the incoming request and pass `optedOut`.
 - The tracker's mode (`script_mode`, default `consentless`) is configured separately
   from server events (`mode`, default `full`): a consentless site needs no banner.
 - Nothing throws for transport reasons. Browser: warn once in development
@@ -43,8 +40,6 @@ import { pageviews } from "@mirafive/sdk-browser/pageviews"
 import { identity } from "@mirafive/sdk-browser/identity"      // required for mode "full"
 import { autocapture } from "@mirafive/sdk-browser/autocapture"
 import { siteSearch } from "@mirafive/sdk-browser/search"
-import { flags } from "@mirafive/sdk-browser/flags"
-import { experiments } from "@mirafive/sdk-browser/experiments" // needs flags + identity
 
 const mira = createMira({
   key: "mf_…",                      // website key
@@ -64,15 +59,11 @@ const mira = createMira({
 | `flush(): Promise<void>` | core | send now |
 | `use(plugin): void` | core | add a plugin after creation (the tracker loads chunks this way) |
 | `destroy(): void` | core | stop timers and listeners, undo patches |
-| `consent(answer: boolean \| { statistics?, experiments?, targeting? })` | identity | `true` = statistics only; scopes by name; `false` forgets everything local and clears the queue |
+| `consent(answer: boolean \| { statistics? })` | identity | `true` = statistics; an `experiments` or `targeting` key is accepted and ignored; `false` forgets everything local and clears the queue |
 | `identify(userId, traits?)` | identity | `$identify`, then `userId` on later events; a different user resets ids first |
 | `reset()` | identity | forget ids, user and session |
 | `anonymousId(): string \| undefined` | identity | |
 | `search(query)` | search | queue `$search` |
-| `flag(key, fallback): string \| boolean` | flags | variant or on/off |
-| `config<T>(key, fallback: T): T` | flags | remote-config value |
-| `onFlags(listener): () => void` | flags | called when flags (re)load |
-| `setFlagProperties(properties)` | flags | facts for targeting rules |
 
 Calling a member whose plugin is missing warns once in development and does nothing.
 `mode: "full"` without `identity()` throws at creation.
@@ -90,9 +81,6 @@ Plugin options:
   `[data-mira-no-capture]`.
 - `siteSearch({ parameters?: string[] /* q, s, search, query */ })` — reads the search
   parameter before URL cleaning, settles 1 s, full mode only.
-- `flags({ bootstrap?: FlagBootstrap, overrides?: Record<string, string | boolean>, refreshSeconds?: number })`
-  — reads `<script type="application/json" id="mirafive-flags">` when present.
-- `experiments()` — sends `$exposure` for page experiments decided by the snippet.
 
 `Plugin` is exported as a type: `{ name: string; setup(core: MiraCore): void | (() => void) }`.
 `MiraCore` is the documented internal surface plugins use (enqueue, hooks for
@@ -107,17 +95,13 @@ Plugin options:
 
 Attributes: `data-key` (required), `data-host`, `data-mode="full"`, `data-hash`,
 `data-manual` (no automatic pageviews), `data-autocapture`, `data-site-search`
-(bare or a comma list of parameters), `data-flags`, `data-track-localhost`.
+(bare or a comma list of parameters), `data-track-localhost`.
 
 Until a chunk arrives: `track`, `pageview` and `flush` issued after a consent grant wait
-for identity and replay in order; `flag`/`config` return the fallback and are not replayed
-(a replayed read would count an exposure the page never showed) — read flags inside the
-`flags` listener; `search` without `data-site-search` does nothing. The flags chunk needs
-`Object.hasOwn` (Safari 15.4+).
+for identity and replay in order; `search` without `data-site-search` does nothing.
 
 Verbs on `mirafive(verb, ...args)`: `track`, `pageview`, `flush`, `consent`,
-`identify`, `reset`, `anonymousId` (callback as last argument), `search`, `flag`,
-`config`, `flags` (listener), `flagProperties`. Unknown verbs warn in development.
+`identify`, `reset`, `anonymousId` (callback as last argument), `search`. Unknown verbs warn in development.
 
 The loader contains the core, pageviews and the command queue. It loads feature
 chunks from its own origin, content-hashed and with SRI, only when needed:
@@ -127,8 +111,6 @@ chunks from its own origin, content-hashed and with SRI, only when needed:
 | identity | `data-mode="full"`, on the first consent grant (or a pre-set granting `__mirafive_consent`); a decline loads it only when ids from an earlier visit must be forgotten |
 | autocapture | `data-autocapture` |
 | search | `data-site-search` in full mode, after consent |
-| flags | `data-flags`, the first flag verb, a flag bootstrap block, or a snippet decision |
-| experiments | full mode, and `window.__mirafive_experiments` is non-empty |
 
 Build output: `dist/mira.js`, `dist/mira.<hash>.js` (pinned copy),
 `dist/chunks/<feature>.<hash>.js`, `dist/manifest.json` (`{ file, integrity }` of the
@@ -165,79 +147,42 @@ In `consentless` mode identifiers throw a `TypeError` (programming error, not
 transport). Retries resend the identical body. `idempotencyKey` derives the batch id
 per PROTOCOL §5.
 
-### `@mirafive/sdk-server/flags`
-
-```ts
-import { MiraFlags } from "@mirafive/sdk-server/flags"
-
-const flags = new MiraFlags({
-  key: process.env.MIRAFIVE_SECRET_KEY,
-  host?, refreshSeconds?: number /* 30, min 10 */, timeoutMs?,
-  document?: FlagDocument,   // a snapshot to start from
-  mira?: Mira,               // counts server-side exposures
-  fetch?, waitUntil?, onError?,
-})
-
-const user = await flags.for({ userId?, anonymousId?, properties?, consent?: { experiments?, targeting? }, optedOut? },
-                            { waitUntil? })   // per-call waitUntil: keep one MiraFlags per isolate on Workers
-user.enabled("new-checkout")         // boolean
-user.variant("pricing-test", "a")    // string (undefined without a fallback on an error)
-user.config("limits", { max: 3 })    // typed remote config
-user.evaluate("pricing-test")        // { variant, reason, rule?, errorCode? } — NOT_ALLOWED / MEMBERSHIP_UNAVAILABLE serve the default
-                                     // variant with an errorCode (FLAGS §5.1); { reason: "ERROR", errorCode: "UNSUPPORTED" | "NOT_READY" | "FLAG_NOT_FOUND" } has none
-user.bootstrap()                     // HTML <script type="application/json" id="mirafive-flags">…</script>, escaped
-await flags.ready(); flags.snapshot(); flags.status()
-```
-
-Responses carrying `bootstrap()` should send `Cache-Control: private, no-store`
-(`bootstrapHeaders` export).
-
 ## Framework packages
 
-All are thin: no transport, no evaluator of their own. Peers:
+All are thin: no transport of their own. Peers:
 `@mirafive/sdk-browser` (client) and `@mirafive/sdk-server` (server).
 
 ### `@mirafive/sdk-react`
 
-`<MiraProvider client={mira} bootstrap?={…}>` (client from `createMira`; `bootstrap` is the
-object or string the server rendered, so hooks match during hydration), `useMira()`,
-`useFlag(key, fallback)`, `useFlagConfig(key, fallback)`,
-`useTrackOnMount(name, properties?)`. Flag hooks use `useSyncExternalStore` and return
-the bootstrap value during SSR and hydration, so both renders match.
+`<MiraProvider client={mira}>` (client from `createMira`), `useMira()`,
+`useTrackOnMount(name, properties?)`.
 
 ### `@mirafive/sdk-next`
 
 - `@mirafive/sdk-next` (client, `"use client"`): `MiraProvider`
   (`websiteKey` — React reserves `key` — default `NEXT_PUBLIC_MIRAFIVE_KEY`, `host`,
-  `mode`, `plugins`, `bootstrap`; creates the client once and adds `pageviews()` unless
-  `plugins` has one), re-exports the sdk-react hooks. Flags or full mode need a small
+  `mode`, `plugins`; creates the client once and adds `pageviews()` unless
+  `plugins` has one), re-exports the sdk-react hooks. Full mode needs a small
   `"use client"` providers file, since plugins are functions.
 - `@mirafive/sdk-next/server`: `mira()` (a process-wide `Mira` from env, flushed via
-  `after()`), `flagsFor(unit)` (reads `Sec-GPC`/`DNT` via `next/headers`),
-  `<MiraFlagsScript flags={…} />` (bootstrap block).
+  `after()`).
 
 ### `@mirafive/sdk-tanstack`
 
 - `@mirafive/sdk-tanstack`: `MiraProvider` (`websiteKey` required, e.g.
   `import.meta.env.VITE_MIRAFIVE_KEY`; same props as Next), re-exported sdk-react hooks.
 - `@mirafive/sdk-tanstack/start`: `miraMiddleware({ key?, host?, waitUntil? })` (TanStack Start request
-  middleware: puts `mira` and `flagsFor` on `context`, flushes after the response),
-  `MiraFlagsScript`.
+  middleware: puts `mira` on `context`, flushes after the response).
 
 ### `@mirafive/sdk-vue`
 
-`app.use(createMiraPlugin(client | undefined, { bootstrap? }))` (undefined on the server;
-`bootstrap` as object or the string from `bootstrap()`), `useMira()`, `useFlag(key, fallback)` and
-`useFlagConfig(key, fallback)` returning refs.
+`app.use(createMiraPlugin(client | undefined))` (undefined on the server), `useMira()`.
 
 ### `@mirafive/sdk-nuxt`
 
-Module config key `mirafive`: `{ key, host, mode, features: ("autocapture" | "search" | "flags" | "experiments")[], secretKey }`.
+Module config key `mirafive`: `{ key, host, mode, features: ("autocapture" | "search")[], secretKey }`.
 Only the listed features are bundled (generated virtual module). Auto-imports
-`useMira`, `useFlag`, `useFlagConfig`; server utils `useServerMira(event)`,
-`miraFlagsFor(event, unit)`; bootstrap written to the head with no-store headers; a
-server middleware may set `event.context.mirafive = { userId, … }` to name the visitor
-for that bootstrap.
+`useMira`; server util `useServerMira(event)`.
 
 ### `@mirafive/sdk-astro`
 
@@ -246,8 +191,7 @@ default export, so `astro add @mirafive/sdk-astro` works) bundles sdk-browser in
 site's own JS (no third-party script); key defaults to `PUBLIC_MIRAFIVE_KEY`. Off in
 `astro dev` unless `dev: true`. `@mirafive/sdk-astro/client`: `mirafive(verb, ...args)`
 (same verbs as the tracker, `anonymousId` with a callback too; also `window.mirafive`),
-`astro()` plugin (holds pageviews across view transitions). `@mirafive/sdk-astro/server`:
-`miraFlagsFor(context, unit, { waitUntil? })`, `MiraFlagsScript` component.
+`astro()` plugin (holds pageviews across view transitions).
 
 ### `@mirafive/sdk-convex`
 
@@ -279,28 +223,21 @@ $mira->identify('u_42', ['plan' => 'pro']);
 $receipt = $mira->send([...events], idempotencyKey: 'order-981');
 $mira->flush();   // also runs on shutdown unless flushOnShutdown: false
 // handOff: fn (string $body, string $batchId) => …  replaces delivery for buffered flushes;
-// a worker then calls $mira->deliverPrepared($body). Also: enabled:, flushOnShutdown:, flagsRefreshSeconds:
-
-$flags = $mira->flags();                       // MiraFive\Flags\MiraFlags, document cached (PSR-16 optional)
-$user  = $flags->for(userId: 'u_42', properties: ['plan' => 'pro'],
-                     consent: ['experiments' => true, 'targeting' => false], optedOut: false);
-$user->enabled('new-checkout'); $user->variant('pricing-test'); $user->config('limits', []);
-$user->bootstrap();                            // escaped <script> block
+// a worker then calls $mira->deliverPrepared($body). Also: enabled:, flushOnShutdown:
 ```
 
 ### `mirafive/sdk-laravel`
 
 Auto-discovered provider; `config/mirafive.php` (`enabled`, `secret_key`, `website_key`,
-`host`, `mode`, `script_mode`, `script_url`, `queue` as `queue` or `connection:queue`,
-`flags.refresh_seconds`, `flags.cache_store`); `mirafive:check` artisan command;
+`host`, `mode`, `script_mode`, `script_url`, `queue` as `queue` or `connection:queue`); `mirafive:check` artisan command;
 `Mira::forUser($user)`, `Mira::optedOut($request)`; `MiraFive\Laravel\Facades\Mira`; flush on `terminating`; optional
 queued delivery (`MIRAFIVE_QUEUE`); Blade `@mirafiveScript` (tracker tag with the
-website key) and `@mirafiveFlags($unit)`; `Mira::fake()` for tests with
+website key); `Mira::fake()` for tests with
 `assertTracked()`.
 
 ### `mirafive/sdk-symfony`
 
 `MiraFive\Symfony\MiraFiveBundle`; config `mirafive: { secret_key, website_key, host, mode }`;
-autowired `MiraFive\Mira` and `MiraFlags`; flush on `kernel.terminate`
-(and `console.terminate`); Twig `mirafive_script()` and `mirafive_flags(unit)`; config also takes `script_mode`;
+autowired `MiraFive\Mira`; flush on `kernel.terminate`
+(and `console.terminate`); Twig `mirafive_script()`; config also takes `script_mode`;
 `mirafive:check` console command.

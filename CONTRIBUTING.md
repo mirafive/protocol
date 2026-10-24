@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping with the MIRA FIVE protocol: the wire contract, flag semantics
+Thanks for helping with the MIRA FIVE protocol: the wire contract
 and public API every SDK implements.
 
 ## Before you start
@@ -19,7 +19,7 @@ bun run check
 
 ## Rules
 
-- PROTOCOL.md, FLAGS.md and API.md are the contract; the TypeScript in `src/` is the
+- PROTOCOL.md and API.md are the contract; the TypeScript in `src/` is the
   reference for it. Change both together.
 - A behavior change comes with a fixture in `fixtures/`, since the SDKs test against them.
 - SDKs copy `src/` and `fixtures/` in with `bun run vendor:protocol`. After a change
@@ -34,10 +34,10 @@ bun run check
 ```
 
 - Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`, `style`, `revert`.
-- The scope is optional and names the area, e.g. `flags`, `pageviews`, `cdn`.
+- The scope is optional and names the area, e.g. `pageviews`, `cdn`.
 - The description is lowercase, has no trailing period and says what changed:
   `fix: count property bytes as UTF-8, as the server now does`.
-- A breaking change gets a `!`: `feat(flags)!: drop the v0 bootstrap format`.
+- A breaking change gets a `!`: `feat(batch)!: drop the v0 batch format`.
 - One logical change per commit.
 
 ## Pull requests

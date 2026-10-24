@@ -20,8 +20,6 @@
     "./types": "./dist/types.js",
     "./limits": "./dist/limits.js",
     "./key": "./dist/key.js",
-    "./hash": "./dist/hash.js",
-    "./evaluate": "./dist/evaluate.js",
     "./batch-id": "./dist/batch-id.js",
     "./clean-url": "./dist/clean-url.js",
     "./package.json": "./package.json"
