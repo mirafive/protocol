@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added `payment_id` (string, 1–255 characters) to the event properties that have meaning, next to `revenue` and `currency`. The batch schema checks it and has new fixtures.
+  PROTOCOL.md §3 states the trust rules: the amount always comes from Stripe, and the attribution precedence is Stripe metadata `mirafive_id`, then a server batch, then the earliest browser event.
 - The default ingest host is `https://collect.mirafive.io`.
 - **Breaking:** feature flags and A/B experiments are removed. FLAGS.md, the flag
   fixtures, the page-snippet fixtures, the `hash` and `evaluate` modules, the flag

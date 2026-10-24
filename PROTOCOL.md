@@ -112,6 +112,19 @@ characters. For Stripe it is a PaymentIntent (`pi_…`), Charge (`ch_…`), Invo
 the payment it imports from the project's connected Stripe account, so a sale counts
 once, with Stripe's verified amount and the visitor attribution of the event.
 
+Trust rules for `payment_id`:
+
+1. The amount, the currency and the refunds of a matched sale always come from Stripe.
+   `payment_id` never adds money.
+2. Attribution has a precedence. The Stripe metadata key `mirafive_id`, set by the
+   merchant's server, wins over a matching event from a server batch (secret key). That
+   wins over the earliest matching browser event. Later browser claims for the same id
+   are ignored.
+3. A browser batch may carry `payment_id`, so a visitor can at most re-attribute a
+   payment whose id the visitor knows, in practice the visitor's own purchase. A
+   merchant who needs attribution that nobody can change sets `mirafive_id` metadata on
+   the payment from the server, or sends the revenue event from the server.
+
 Strings MUST be well-formed UTF-16 before encoding: truncating in the middle of a
 surrogate pair produces JSON the server refuses as a whole (`400 invalid_json`).
 Lengths are counted by the server in Unicode code points. SDKs MAY count UTF-16 code
