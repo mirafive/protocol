@@ -38,7 +38,7 @@ The body is the same JSON batch (§3) in both cases. The browser form is a CORS
 *simple request*: no preflight, and it works with `navigator.sendBeacon`. The server
 reads the body as JSON whatever the content type says.
 
-The default host is `https://events.mirafive.io`.
+The default host is `https://collect.mirafive.io`.
 
 Website keys are checked against the source's allowed origins (`Origin` header;
 `www.` and the apex count as one site; `localhost` is always allowed).
@@ -98,10 +98,19 @@ Website keys are checked against the source's allowed origins (`Origin` header;
 | `time` | integer | OPTIONAL, epoch ms when it happened. Absent: `sentAt`, else the time received. Far-future and far-past times are clamped by the server |
 | `id` | string | OPTIONAL UUID, unique within the batch. Absent: the server derives a stable id from `batch`, the index and `time` |
 | `page` | object | OPTIONAL: `url` ≤ 2048, `title` ≤ 512, `referrer` ≤ 2048 characters |
-| `properties` | object | OPTIONAL. JSON object, ≤ 32 KB as UTF-8 JSON (no escaping of `/` or non-ASCII; an SDK that counts the escaped form is merely stricter), ≤ 64 leaf values, depth ≤ 5, keys ≤ 128 characters. `revenue` (number) and `currency` (ISO 4217) have meaning |
+| `properties` | object | OPTIONAL. JSON object, ≤ 32 KB as UTF-8 JSON (no escaping of `/` or non-ASCII; an SDK that counts the escaped form is merely stricter), ≤ 64 leaf values, depth ≤ 5, keys ≤ 128 characters. `revenue` (number), `currency` (ISO 4217) and `payment_id` (string, 1–255 characters) have meaning |
 | `anonymousId` | string | OPTIONAL, 1–256 characters, not blank. **Full only** |
 | `userId` | string | OPTIONAL, 1–256 characters, not blank. **Full only** |
 | `sessionId` | string | OPTIONAL UUID. **Full only** |
+
+#### Revenue properties
+
+A revenue event carries `revenue` (number) and `currency` (ISO 4217). It MAY also
+carry `payment_id`: the payment provider's id of that payment, a string of 1–255
+characters. For Stripe it is a PaymentIntent (`pi_…`), Charge (`ch_…`), Invoice
+(`in_…`) or Checkout Session (`cs_…`) id. The server uses it to merge the event with
+the payment it imports from the project's connected Stripe account, so a sale counts
+once, with Stripe's verified amount and the visitor attribution of the event.
 
 Strings MUST be well-formed UTF-16 before encoding: truncating in the middle of a
 surrogate pair produces JSON the server refuses as a whole (`400 invalid_json`).

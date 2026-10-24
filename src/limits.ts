@@ -1,5 +1,5 @@
 export const PROTOCOL_VERSION = 1
-export const DEFAULT_HOST = "https://events.mirafive.io"
+export const DEFAULT_HOST = "https://collect.mirafive.io"
 
 export const MAX_BODY_BYTES = 1_048_576
 export const MAX_EVENTS = 1000

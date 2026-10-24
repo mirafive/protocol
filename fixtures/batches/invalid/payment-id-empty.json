@@ -1,0 +1,22 @@
+{
+    "v": 1,
+    "batch": "0192d4a8-7b1c-4e8a-9c1d-2b3e4f5a6b7d",
+    "mode": "full",
+    "context": {
+        "sdk": "mirafive-server/1.0.0"
+    },
+    "events": [
+        {
+            "name": "order completed",
+            "id": "8a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4e",
+            "time": 1727430199000,
+            "userId": "u_42",
+            "properties": {
+                "order": "981",
+                "revenue": 129,
+                "currency": "EUR",
+                "payment_id": ""
+            }
+        }
+    ]
+}

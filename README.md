@@ -66,7 +66,7 @@ bun run check     # format check, lint (type-aware), typecheck, tests, build
 
 Facts:
 
-- Events: `POST https://events.mirafive.io/v1/batch/{websiteKey}` (browser,
+- Events: `POST https://collect.mirafive.io/v1/batch/{websiteKey}` (browser,
   `text/plain`, no preflight, `sendBeacon`-safe) or `POST /v1/batch` with
   `Authorization: Bearer {secretKey}` (server). One JSON batch format for both:
   `{ v: 1, batch: uuid, mode: "consentless" | "full", sentAt?, context?, events: [...] }`,

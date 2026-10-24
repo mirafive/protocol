@@ -5,7 +5,7 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md).
 
 ## Shared rules
 
-- Default host `https://events.mirafive.io`. A host without a scheme is an error.
+- Default host `https://collect.mirafive.io`. A host without a scheme is an error.
 - SDK identity in `context.sdk`: `mirafive-browser`, `mirafive-tracker`,
   `mirafive-server`, `mirafive-php`. Framework packages report the SDK they run on,
   unchanged, and never invent their own transport.
@@ -19,6 +19,9 @@ first. Wire details are in [PROTOCOL.md](PROTOCOL.md).
   `createMira<Events>()` / `new Mira<Events>()` where
   `Events extends Record<string, Record<string, unknown> | undefined>` narrows
   `track(name, properties)`.
+- Revenue has no verb: it is a `track` call whose properties hold `revenue`, `currency`
+  and optionally `payment_id`, the payment provider's id of the payment (PROTOCOL §3).
+  SDKs pass the property through unchanged; the wire key is `payment_id`.
 - The tracker's mode (`script_mode`, default `consentless`) is configured separately
   from server events (`mode`, default `full`): a consentless site needs no banner.
 - Nothing throws for transport reasons. Browser: warn once in development

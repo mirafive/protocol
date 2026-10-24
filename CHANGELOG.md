@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `payment_id` (string, 1–255 characters) to the event properties that have meaning, next to `revenue` and `currency`. The batch schema checks it and has new fixtures.
+- The default ingest host is `https://collect.mirafive.io`.
 - **Breaking:** feature flags and A/B experiments are removed. FLAGS.md, the flag
   fixtures, the page-snippet fixtures, the `hash` and `evaluate` modules, the flag
   types, the lookup limits and the flag error codes (`secret_key_exposed`,

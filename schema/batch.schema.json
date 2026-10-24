@@ -159,6 +159,13 @@
           "maxProperties": 64,
           "propertyNames": {
             "maxLength": 128
+          },
+          "properties": {
+            "payment_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
           }
         },
         "anonymousId": {
