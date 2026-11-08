@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1 — 2026-11-08
+
+### Fixed
+
+- `validateBatch` and `validateEvent` build their rules on first use, so bundlers drop the
+  validator from code that never calls it. It had added 1.8 kB gzip to `@mirafive/web`'s script
+  tag.
+
 ## 2.0.0 — 2026-11-08
 
 A rewrite for the current MIRA FIVE platform: consent tiers, the revenue ledger, touchpoints and

@@ -182,145 +182,164 @@ const properties: Check = (value, path, issues) => {
   }
 };
 
-const short = string({ max: LIMITS.stringLength });
-const url = string({ max: LIMITS.urlLength });
-const size = integer(0, 20_000);
+/**
+ * The rules, built on first use: nothing runs when the module loads, so bundlers drop the
+ * validator from apps that never call it (the browser SDK's script tag, for one).
+ */
+let built: { event: Check; touchpoint: Check } | undefined;
+function rules() {
+  if (built) return built;
+  const short = string({ max: LIMITS.stringLength });
+  const url = string({ max: LIMITS.urlLength });
+  const size = integer(0, 20_000);
 
-const context = object({
-  page: object({ url, referrer: url, title: short }),
-  app: object({ name: short, version: short, build: short, namespace: short }),
-  device: object({
-    type: oneOf(["desktop", "mobile", "tablet", "tv", "other"]),
-    manufacturer: short,
-    model: short,
-  }),
-  os: object({ name: short, version: short }),
-  screen: object({ width: size, height: size, density: number({ positive: true, max: 10 }) }),
-  viewport: object({ width: size, height: size }),
-  locale: string({ max: 35 }),
-  languages: (value, path, issues) => {
-    if (!Array.isArray(value)) {
-      issues.push({ path, message: "expected a list" });
-      return;
-    }
-    if (value.length > 10) issues.push({ path, message: "at most 10 languages" });
-    value.forEach((entry, index) => string({ max: 35 })(entry, join(path, index), issues));
-  },
-  timezone: string({ max: 64 }),
-  location: object(
-    {
-      latitude: number({ min: -90, max: 90 }),
-      longitude: number({ min: -180, max: 180 }),
-    },
-    ["latitude", "longitude"],
-  ),
-  library: object({ name: string({ max: 50 }), version: string({ max: 30 }) }, ["name", "version"]),
-  ip: string({ max: 45 }),
-  user_agent: string({ max: 1024 }),
-});
-
-const consentState = oneOf(consentStates);
-const consent: Check = (value, path, issues) => {
-  if (value === "not_applicable") return;
-  if (!isObject(value)) {
-    {
-      issues.push({ path, message: 'expected { analytics, marketing } or "not_applicable"' });
-      return;
-    }
-  }
-  object({ analytics: consentState, marketing: consentState }, ["analytics"])(value, path, issues);
-};
-
-const minor = integer(-1e15, 1e15);
-const id = string({ max: LIMITS.idLength });
-const revenue = object(
-  {
-    amount: minor,
-    currency: string({ min: 3, max: 3, hint: "an ISO 4217 code" }),
-    entry_id: id,
-    kind: oneOf(revenueKinds),
-    fee: minor,
-    tax: minor,
-    refund_of: id,
-    product: id,
-    subscription: object(
-      {
-        id: string({ min: 1, max: LIMITS.idLength }),
-        interval: oneOf(billingIntervals),
-        interval_count: integer(1, 36),
-        period_start: dateTime,
-        period_end: dateTime,
-      },
-      ["id"],
-    ),
-  },
-  ["amount", "currency"],
-);
-
-const externalIds: Check = (value, path, issues) => {
-  if (!isObject(value)) {
-    issues.push({ path, message: "expected an object" });
-    return;
-  }
-  for (const [key, item] of Object.entries(value)) {
-    if (!(externalIdTypes as readonly string[]).includes(key)) {
-      issues.push({
-        path: join(path, key),
-        message: `expected one of ${externalIdTypes.join(", ")}`,
-      });
-    } else if (item !== undefined) {
-      string({ min: 1, max: LIMITS.idLength })(item, join(path, key), issues);
-    }
-  }
-};
-
-const text = string({ max: 200, trim: true });
-const touchpoint = object(
-  {
-    kind: oneOf(touchpointKinds),
-    channel: oneOf(touchpointChannels),
-    source: text,
-    medium: text,
-    campaign: text,
-    content: text,
-    campaign_id: text,
-    ad_group_id: text,
-    ad_id: text,
-    code: text,
-    answer: string({ max: 500, trim: true }),
-    external_ref: text,
-  },
-  ["kind"],
-);
-
-const event = object(
-  {
-    event_id: string({ max: 36, pattern: UUID, hint: "expected a UUID" }),
-    type: oneOf(["track", "page", "screen", "identify", "group"]),
-    event: string({
-      min: 1,
-      max: LIMITS.nameLength,
-      pattern: /^\P{Cc}+$/u,
-      hint: "no control characters",
+  const context = object({
+    page: object({ url, referrer: url, title: short }),
+    app: object({ name: short, version: short, build: short, namespace: short }),
+    device: object({
+      type: oneOf(["desktop", "mobile", "tablet", "tv", "other"]),
+      manufacturer: short,
+      model: short,
     }),
-    timestamp: dateTime,
-    anonymous_id: id,
-    user_id: id,
-    session_id: id,
-    group_id: id,
-    properties,
-    traits: properties,
-    external_ids: externalIds,
-    revenue,
-    context,
-    consent,
-  },
-  ["event_id", "type", "event"],
-);
+    os: object({ name: short, version: short }),
+    screen: object({ width: size, height: size, density: number({ positive: true, max: 10 }) }),
+    viewport: object({ width: size, height: size }),
+    locale: string({ max: 35 }),
+    languages: (value, path, issues) => {
+      if (!Array.isArray(value)) {
+        issues.push({ path, message: "expected a list" });
+        return;
+      }
+      if (value.length > 10) issues.push({ path, message: "at most 10 languages" });
+      value.forEach((entry, index) => string({ max: 35 })(entry, join(path, index), issues));
+    },
+    timezone: string({ max: 64 }),
+    location: object(
+      {
+        latitude: number({ min: -90, max: 90 }),
+        longitude: number({ min: -180, max: 180 }),
+      },
+      ["latitude", "longitude"],
+    ),
+    library: object({ name: string({ max: 50 }), version: string({ max: 30 }) }, [
+      "name",
+      "version",
+    ]),
+    ip: string({ max: 45 }),
+    user_agent: string({ max: 1024 }),
+  });
+
+  const consentState = oneOf(consentStates);
+  const consent: Check = (value, path, issues) => {
+    if (value === "not_applicable") return;
+    if (!isObject(value)) {
+      {
+        issues.push({ path, message: 'expected { analytics, marketing } or "not_applicable"' });
+        return;
+      }
+    }
+    object({ analytics: consentState, marketing: consentState }, ["analytics"])(
+      value,
+      path,
+      issues,
+    );
+  };
+
+  const minor = integer(-1e15, 1e15);
+  const id = string({ max: LIMITS.idLength });
+  const revenue = object(
+    {
+      amount: minor,
+      currency: string({ min: 3, max: 3, hint: "an ISO 4217 code" }),
+      entry_id: id,
+      kind: oneOf(revenueKinds),
+      fee: minor,
+      tax: minor,
+      refund_of: id,
+      product: id,
+      subscription: object(
+        {
+          id: string({ min: 1, max: LIMITS.idLength }),
+          interval: oneOf(billingIntervals),
+          interval_count: integer(1, 36),
+          period_start: dateTime,
+          period_end: dateTime,
+        },
+        ["id"],
+      ),
+    },
+    ["amount", "currency"],
+  );
+
+  const externalIds: Check = (value, path, issues) => {
+    if (!isObject(value)) {
+      issues.push({ path, message: "expected an object" });
+      return;
+    }
+    for (const [key, item] of Object.entries(value)) {
+      if (!(externalIdTypes as readonly string[]).includes(key)) {
+        issues.push({
+          path: join(path, key),
+          message: `expected one of ${externalIdTypes.join(", ")}`,
+        });
+      } else if (item !== undefined) {
+        string({ min: 1, max: LIMITS.idLength })(item, join(path, key), issues);
+      }
+    }
+  };
+
+  const text = string({ max: 200, trim: true });
+  const touchpoint = object(
+    {
+      kind: oneOf(touchpointKinds),
+      channel: oneOf(touchpointChannels),
+      source: text,
+      medium: text,
+      campaign: text,
+      content: text,
+      campaign_id: text,
+      ad_group_id: text,
+      ad_id: text,
+      code: text,
+      answer: string({ max: 500, trim: true }),
+      external_ref: text,
+    },
+    ["kind"],
+  );
+
+  const event = object(
+    {
+      event_id: string({ max: 36, pattern: UUID, hint: "expected a UUID" }),
+      type: oneOf(["track", "page", "screen", "identify", "group"]),
+      event: string({
+        min: 1,
+        max: LIMITS.nameLength,
+        pattern: /^\P{Cc}+$/u,
+        hint: "no control characters",
+      }),
+      timestamp: dateTime,
+      anonymous_id: id,
+      user_id: id,
+      session_id: id,
+      group_id: id,
+      properties,
+      traits: properties,
+      external_ids: externalIds,
+      revenue,
+      context,
+      consent,
+    },
+    ["event_id", "type", "event"],
+  );
+
+  built = { event, touchpoint };
+  return built;
+}
 
 /** Every problem the ingest would reject this event for; an empty list means it is accepted. */
 export function validateEvent(value: unknown, path = ""): Issue[] {
   const issues: Issue[] = [];
+  const { event, touchpoint } = rules();
   event(value, path, issues);
   if (isObject(value) && value.event === "$touchpoint") {
     if (value.type !== "track") {
