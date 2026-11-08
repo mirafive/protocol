@@ -1,0 +1,41 @@
+{
+  "stream": "s1",
+  "seq": 2,
+  "events": [
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b02",
+      "type": "track",
+      "event": "signup_started",
+      "anonymous_id": "0192d4a8-0000-7000-8000-000000000001",
+      "properties": {
+        "plan": "pro",
+        "plan.seats": 3
+      },
+      "context": {
+        "screen": {
+          "width": 1440,
+          "height": 900,
+          "density": 2
+        },
+        "timezone": "Europe/Berlin"
+      },
+      "consent": {
+        "analytics": "granted",
+        "marketing": "denied"
+      }
+    },
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b03",
+      "type": "track",
+      "event": "$touchpoint",
+      "properties": {
+        "kind": "survey",
+        "source": "podcast",
+        "answer": "A podcast"
+      },
+      "consent": {
+        "analytics": "granted"
+      }
+    }
+  ]
+}

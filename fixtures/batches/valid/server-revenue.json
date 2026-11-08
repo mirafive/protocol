@@ -1,0 +1,60 @@
+{
+  "sent_at": "2026-11-08T12:00:00.000Z",
+  "events": [
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b04",
+      "type": "identify",
+      "event": "$identify",
+      "user_id": "user_42",
+      "traits": {
+        "plan": "pro",
+        "email": "ada@example.com"
+      },
+      "external_ids": {
+        "stripe_customer": "cus_1"
+      },
+      "consent": "not_applicable"
+    },
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b05",
+      "type": "track",
+      "event": "$revenue",
+      "user_id": "user_42",
+      "revenue": {
+        "amount": 999,
+        "currency": "EUR",
+        "entry_id": "stripe:in_1",
+        "fee": 150,
+        "tax": 160,
+        "product": "premium_monthly",
+        "subscription": {
+          "id": "sub_1",
+          "interval": "month"
+        }
+      },
+      "consent": "not_applicable"
+    },
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b06",
+      "type": "track",
+      "event": "$revenue",
+      "user_id": "user_42",
+      "revenue": {
+        "amount": -999,
+        "currency": "EUR",
+        "kind": "refund",
+        "entry_id": "stripe:in_1:refund",
+        "refund_of": "stripe:in_1"
+      }
+    },
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b07",
+      "type": "group",
+      "event": "$group",
+      "group_id": "acme",
+      "traits": {
+        "name": "Acme GmbH"
+      }
+    }
+  ]
+}

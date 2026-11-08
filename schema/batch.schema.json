@@ -1,184 +1,444 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mirafive.io/schema/v1/batch.schema.json",
-  "title": "MIRA FIVE event batch, protocol v1",
-  "description": "PROTOCOL.md §3 and §4: what a conforming SDK sends. The server may accept more (null for an optional field) and checks what a schema cannot express: event ids unique within the batch, properties ≤ 32 KB encoded with ≤ 64 leaf values and depth ≤ 5, a body ≤ 1 MiB. Unknown fields are allowed and ignored.",
   "type": "object",
-  "required": ["v", "batch", "mode", "events"],
   "properties": {
-    "v": {
-      "const": 1
-    },
-    "batch": {
-      "$ref": "#/$defs/uuid"
-    },
-    "mode": {
-      "enum": ["consentless", "full"]
-    },
-    "sentAt": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "context": {
-      "$ref": "#/$defs/context"
-    },
-    "events": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 1000,
-      "items": {
-        "$ref": "#/$defs/event"
-      }
-    }
-  },
-  "if": {
-    "type": "object",
-    "required": ["mode"],
-    "properties": {
-      "mode": {
-        "const": "consentless"
-      }
-    }
-  },
-  "then": {
-    "type": "object",
-    "properties": {
-      "context": {
-        "type": "object",
-        "properties": {
-          "locale": false,
-          "timezone": false,
-          "screen": false
-        }
-      },
-      "events": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "anonymousId": false,
-            "userId": false,
-            "sessionId": false
-          }
-        }
-      }
-    }
-  },
-  "$defs": {
-    "uuid": {
+    "key": {
       "type": "string",
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      "maxLength": 100
     },
-    "identifier": {
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "stream": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 256,
-      "pattern": "\\S"
+      "maxLength": 64
     },
-    "context": {
-      "type": "object",
-      "properties": {
-        "sdk": {
-          "description": "name/version; name ≤ 64, version ≤ 32 characters",
-          "type": "string",
-          "pattern": "^[^/]{1,64}/.{1,32}$"
-        },
-        "locale": {
-          "type": "string",
-          "minLength": 2,
-          "maxLength": 35
-        },
-        "timezone": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 64
-        },
-        "screen": {
-          "type": "array",
-          "prefixItems": [
-            {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 32768
-            },
-            {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 32768
-            }
-          ],
-          "minItems": 2,
-          "items": false
-        }
-      }
+    "seq": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 2147483647
     },
-    "event": {
-      "type": "object",
-      "required": ["name"],
-      "properties": {
-        "name": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128,
-          "pattern": "^\\S(?:[\\s\\S]*\\S)?$",
-          "anyOf": [
-            {
-              "pattern": "^[^$]"
-            },
-            {
-              "enum": ["$pageview", "$autocapture", "$identify", "$search", "$install_check", "$exposure"]
-            }
-          ]
-        },
-        "time": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "id": {
-          "$ref": "#/$defs/uuid"
-        },
-        "page": {
-          "type": "object",
-          "properties": {
-            "url": {
-              "type": "string",
-              "maxLength": 2048
-            },
-            "title": {
-              "type": "string",
-              "maxLength": 512
-            },
-            "referrer": {
-              "type": "string",
-              "maxLength": 2048
-            }
-          }
-        },
+    "events": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
         "properties": {
-          "type": "object",
-          "maxProperties": 64,
-          "propertyNames": {
-            "maxLength": 128
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["track", "page", "screen", "identify", "group"]
+          },
+          "event": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "^\\P{Cc}+$"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "anonymous_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "user_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "session_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "group_id": {
+            "type": "string",
+            "maxLength": 200
           },
           "properties": {
-            "payment_id": {
-              "description": "The payment provider's id of the payment (for Stripe pi_, ch_, in_ or cs_). The server merges the event with the imported payment; the amount, currency and refunds always come from the provider, and a browser claim ranks below a server batch and Stripe metadata mirafive_id (PROTOCOL.md §3).",
+            "default": {},
+            "type": "object",
+            "propertyNames": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 255
+              "maxLength": 100
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2048
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              ]
             }
+          },
+          "traits": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2048
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "maxItems": 50,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2048
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "external_ids": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "stripe_customer",
+                "revenuecat_app_user",
+                "shopify_customer",
+                "shopware_customer"
+              ]
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "revenue": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "integer",
+                "minimum": -1000000000000000,
+                "maximum": 1000000000000000
+              },
+              "currency": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 3
+              },
+              "entry_id": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["charge", "subscription_payment", "refund", "dispute", "dispute_won"]
+              },
+              "fee": {
+                "type": "integer",
+                "minimum": -1000000000000000,
+                "maximum": 1000000000000000
+              },
+              "tax": {
+                "type": "integer",
+                "minimum": -1000000000000000,
+                "maximum": 1000000000000000
+              },
+              "refund_of": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "product": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "subscription": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "interval": {
+                    "default": "month",
+                    "type": "string",
+                    "enum": ["day", "week", "month", "year"]
+                  },
+                  "interval_count": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 36
+                  },
+                  "period_start": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  "period_end": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  }
+                },
+                "required": ["id"]
+              }
+            },
+            "required": ["amount", "currency"]
+          },
+          "context": {
+            "default": {},
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  "referrer": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  "title": {
+                    "type": "string",
+                    "maxLength": 2048
+                  }
+                }
+              },
+              "app": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "version": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "build": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "maxLength": 2048
+                  }
+                }
+              },
+              "device": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": ["desktop", "mobile", "tablet", "tv", "other"]
+                  },
+                  "manufacturer": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "model": {
+                    "type": "string",
+                    "maxLength": 2048
+                  }
+                }
+              },
+              "os": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "version": {
+                    "type": "string",
+                    "maxLength": 2048
+                  }
+                }
+              },
+              "screen": {
+                "type": "object",
+                "properties": {
+                  "width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20000
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20000
+                  },
+                  "density": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 10
+                  }
+                }
+              },
+              "viewport": {
+                "type": "object",
+                "properties": {
+                  "width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20000
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20000
+                  }
+                }
+              },
+              "locale": {
+                "type": "string",
+                "maxLength": 35
+              },
+              "languages": {
+                "maxItems": 10,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 35
+                }
+              },
+              "timezone": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": ["latitude", "longitude"]
+              },
+              "library": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 50
+                  },
+                  "version": {
+                    "type": "string",
+                    "maxLength": 30
+                  }
+                },
+                "required": ["name", "version"]
+              },
+              "ip": {
+                "type": "string",
+                "maxLength": 45
+              },
+              "user_agent": {
+                "type": "string",
+                "maxLength": 1024
+              }
+            }
+          },
+          "consent": {
+            "default": {
+              "analytics": "unknown",
+              "marketing": "unknown"
+            },
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "analytics": {
+                    "type": "string",
+                    "enum": ["granted", "denied", "unknown"]
+                  },
+                  "marketing": {
+                    "default": "unknown",
+                    "type": "string",
+                    "enum": ["granted", "denied", "unknown"]
+                  }
+                },
+                "required": ["analytics"]
+              },
+              {
+                "type": "string",
+                "const": "not_applicable"
+              }
+            ]
           }
         },
-        "anonymousId": {
-          "$ref": "#/$defs/identifier"
-        },
-        "userId": {
-          "$ref": "#/$defs/identifier"
-        },
-        "sessionId": {
-          "$ref": "#/$defs/uuid"
-        }
+        "required": ["event_id", "type", "event"]
       }
     }
-  }
+  },
+  "required": ["events"],
+  "$id": "https://mirafive.io/schema/batch.schema.json",
+  "title": "MIRA FIVE batch",
+  "description": "A batch of events for POST https://events.mirafive.io/v1/batch (Authorization: Bearer <key>). Generated from the ingest's own schema."
 }

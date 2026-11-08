@@ -1,50 +1,65 @@
 {
   "name": "@mirafive/protocol",
-  "version": "1.0.0",
-  "private": true,
-  "description": "MIRA FIVE wire protocol and fixtures",
-  "homepage": "https://mirafive.io",
+  "version": "2.0.0",
+  "description": "The MIRA FIVE wire format: event and batch types, limits, eventIdFor and the helpers every MIRA FIVE SDK shares. No dependencies.",
+  "keywords": [
+    "analytics",
+    "attribution",
+    "mira-five",
+    "mirafive",
+    "protocol",
+    "schema"
+  ],
+  "homepage": "https://github.com/mirafive/protocol#readme",
+  "bugs": {
+    "url": "https://github.com/mirafive/protocol/issues"
+  },
   "license": "MIT",
-  "author": "MIRA FIVE <support@mirafive.io>",
-  "repository": "github:mirafive/protocol",
+  "author": "Cloo GmbH <hallo@mirafive.io> (https://mirafive.io)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mirafive/protocol.git"
+  },
+  "bin": {
+    "mirafive-validate": "./dist/cli.js"
+  },
   "files": [
     "dist",
-    "src",
-    "schema",
-    "fixtures"
+    "fixtures",
+    "schema"
   ],
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./types": "./dist/types.js",
-    "./limits": "./dist/limits.js",
-    "./key": "./dist/key.js",
-    "./batch-id": "./dist/batch-id.js",
-    "./clean-url": "./dist/clean-url.js",
-    "./package.json": "./package.json"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./batch.schema.json": "./schema/batch.schema.json",
+    "./package.json": "./package.json",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "lint": "oxlint --type-aware --deny-warnings",
+    "build": "bun run build.ts",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build"
+    "lint": "oxlint",
+    "test": "bun test",
+    "typecheck": "bun check"
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "ajv": "^8.20.0",
-    "oxfmt": "^0.74.0",
-    "oxlint": "^1.89.0",
-    "oxlint-tsgolint": "^7.0.2005",
-    "tsdown": "^0.23.0",
-    "typescript": "^7.0.2",
-    "vitest": "^5.0.5"
-  },
-  "engines": {
-    "node": ">=20"
+    "@types/bun": "^1.4.4",
+    "oxfmt": "^0.77.0",
+    "oxlint": "^1.92.0",
+    "oxlint-tsgolint": "^7.0.2006",
+    "typescript": "^7.0.2"
   },
   "packageManager": "bun@1.4.4"
 }

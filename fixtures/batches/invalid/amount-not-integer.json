@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b01",
+      "type": "track",
+      "event": "$revenue",
+      "revenue": {
+        "amount": 19.99,
+        "currency": "EUR"
+      }
+    }
+  ]
+}

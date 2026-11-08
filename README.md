@@ -1,116 +1,66 @@
-# MIRA FIVE protocol
+# @mirafive/protocol
 
-The wire contract of the MIRA FIVE SDKs (privacy-first analytics, hosted in the EU),
-with the conformance fixtures every SDK is tested against and a tiny TypeScript
-reference implementation.
+The MIRA FIVE wire format and the helpers every MIRA FIVE SDK shares: event and batch types,
+limits, reserved names, `eventIdFor`, UUIDv7, property cleaning and retry rules. No
+dependencies; runs in browsers, Node, Bun, Deno, workers and Convex.
 
-| File | What it is |
-|---|---|
-| [PROTOCOL.md](PROTOCOL.md) | events: keys, the batch, collection modes, delivery, reserved names, browser state |
-| [API.md](API.md) | the public API every SDK package implements |
-| [`schema/`](schema) | JSON Schema 2020-12 for the batch, the receipt and error bodies |
-| [`fixtures/`](fixtures) | conformance cases: reserved names, batch ids, example batches |
-| [`src/`](src) | `@mirafive/protocol`, the TypeScript reference (private, vendored, never published) |
+The MIRA FIVE ingest checks its own schema against this package on every build, so what
+`validateBatch` accepts is what the ingest accepts.
 
-## The TypeScript reference
+You rarely install it yourself: [`@mirafive/web`](https://github.com/mirafive/sdk-web) and
+[`@mirafive/node`](https://github.com/mirafive/sdk-node) depend on it. Use it to build your own
+integration, to validate batches, or to port MIRA FIVE to another language.
 
-Zero dependencies, ESM, one module per concern so a consumer takes only what it
-needs:
+## Contents
 
-| Module | Exports | min + gzip |
-|---|---|---|
-| `types.ts` | `Batch`, `Event`, `Context`, `Receipt`, `ErrorBody`, `Mode`, … | 0 B |
-| `limits.ts` | `MAX_EVENTS`, length and property limits, `RESERVED_NAMES`, `DEFAULT_HOST`, … | 475 B, tree-shaken per constant |
-| `key.ts` | `KEY_PATTERN`, `keyNamespace(key)` | 167 B |
-| `batch-id.ts` | `batchIdFor(key): Promise<string>` | 271 B |
-| `clean-url.ts` | `cleanUrl(href, hash?)` | 328 B, plus the query list from `limits` |
+| Export                                                                                                                     | What it is                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WireEvent`, `WireBatch`, `BatchResult`, `EventContext`, `Revenue`, `Consent`                                              | The types of what `POST /v1/batch` accepts and answers. They are checked against the ingest's own schema on every build, so they cannot drift.    |
+| `LIMITS`, `reservedEvents`, `externalIdTypes`, `revenueKinds`, `billingIntervals`, `touchpointKinds`, `touchpointChannels` | The rules, as values.                                                                                                                             |
+| `eventIdFor(key)`                                                                                                          | A stable event id from your own key: UUIDv8 from SHA-256. The same key gives the same id in every MIRA FIVE SDK and language.                     |
+| `uuidv7()`                                                                                                                 | Time-ordered event ids.                                                                                                                           |
+| `cleanProperties(value)`, `cleanExternalIds(value)`                                                                        | Make arbitrary values fit the wire: flatten objects to dot keys, apply the limits.                                                                |
+| `retryable(status)`, `backoffMs(attempt, atLeastMs)`, `retryAfterMs(header)`                                               | The retry rules every SDK follows.                                                                                                                |
+| `keyKind(key)`                                                                                                             | `"public"` (`mira_pk_…`), `"secret"` (`mira_sk_…`) or `"unknown"`.                                                                                |
+| `validateBatch(batch)`, `validateEvent(event)`                                                                             | Every problem the ingest would reject, as `{ path, message }`; an empty list means accepted. No dependencies.                                     |
+| `mirafive-validate` (`npx @mirafive/protocol batches.json`)                                                                | The same check on the command line, for SDKs in other languages and CI: one batch or a list, from a file or standard input; exits 1 on a problem. |
+| `@mirafive/protocol/batch.schema.json`                                                                                     | JSON Schema (2020-12) of a batch, generated from the ingest's schema.                                                                             |
+| `@mirafive/protocol/fixtures/event-ids.json`                                                                               | `eventIdFor` test vectors for SDKs in other languages.                                                                                            |
+| `@mirafive/protocol/fixtures/batches/{valid,invalid}/*.json`                                                               | Batches the ingest accepts and rejects, for SDK test suites.                                                                                      |
 
-### How SDK repos use it
-
-SDK repos do not depend on this package. They **vendor** the source files they need
-into `src/protocol/`, committed, so their bundles contain the code once and their
-builds need nothing from here:
-
-```sh
-# in an SDK repo, with this repo checked out next to it (../protocol)
-bun run vendor:protocol            # runs scripts/vendor-protocol.ts from _template
-```
-
-Each vendored file starts with
-`// Vendored from mirafive/protocol <sha>. Do not edit; run bun run vendor:protocol.`
-Internal imports (for example `batch-id.ts` → `types.ts`) are followed automatically.
-SDK repos in other languages port the code and run the same fixtures.
-
-### How the fixtures are made
-
-`reserved-names.json` is generated by the MIRA FIVE app and copied here byte for byte:
+## The wire in one request
 
 ```sh
-# in the app
-cp tests/Fixtures/sdk/reserved-names.json ../sdk/protocol/fixtures/
+curl https://events.mirafive.io/v1/batch \
+  -H "Authorization: Bearer $MIRAFIVE_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"events":[{"event_id":"0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b7c","type":"track","event":"report_exported","user_id":"user_42","consent":"not_applicable"}]}'
 ```
 
-then update the sha256 pin in `test/fixtures.test.ts`. `batch-id.cases.json` is
-computed with Python's `hashlib`, independently of the TypeScript code it checks.
-The example batches in `fixtures/batches/` are hand-written and validated against
-the schema.
+The answer is `{ "accepted": 1, "duplicates": 0, "rejected": [] }`. Events are checked one by
+one, so a bad event never sinks the batch; resend a batch with the same `event_id`s and it counts
+once.
 
-## Development
+## For AI coding assistants
 
-```sh
-bun install
-bun run check     # format check, lint (type-aware), typecheck, tests, build
-```
+Rules for integrating MIRA FIVE correctly. They hold for every MIRA FIVE SDK.
 
-## For AI agents
-
-Facts:
-
-- Events: `POST https://collect.mirafive.io/v1/batch/{websiteKey}` (browser,
-  `text/plain`, no preflight, `sendBeacon`-safe) or `POST /v1/batch` with
-  `Authorization: Bearer {secretKey}` (server). One JSON batch format for both:
-  `{ v: 1, batch: uuid, mode: "consentless" | "full", sentAt?, context?, events: [...] }`,
-  validated by `schema/batch.schema.json`.
-- `202` with `{ batch, accepted, dropped, reason? }` is final. Retry only 408, 429
-  (after `Retry-After`), 5xx and network errors, resending the byte-identical body.
-- The batch id is the idempotency key; from a caller key it is
-  `UUIDv8(SHA-256("mirafive:batch:" + key))` (`fixtures/batch-id.cases.json`).
-- Consentless batches carry no `anonymousId`/`userId`/`sessionId` and no
-  `context.locale`/`timezone`/`screen`, and the SDK writes nothing to the device.
-- A secret key never reaches a browser. Env vars: `MIRAFIVE_SECRET_KEY`,
-  `MIRAFIVE_WEBSITE_KEY`, `MIRAFIVE_HOST`.
-- Fixtures are generated by the server. Never edit them.
-
-Prompt for implementing an SDK in another language:
-
-```text
-Implement a MIRA FIVE SDK for <LANGUAGE/RUNTIME> against the protocol in this repository.
-
-Read PROTOCOL.md and API.md in full first; they are the contract. API.md
-lists the public surface for the closest existing SDK (sdk-server for a server
-runtime, sdk-browser for a client); mirror it in the idioms of <LANGUAGE>.
-
-Requirements:
-- Build batches exactly as PROTOCOL.md §3 and validate your output against
-  schema/batch.schema.json in tests (every file in fixtures/batches must validate,
-  every file in fixtures/batches/invalid must not).
-- Respect the collection modes of §4 (consentless: no identifiers, no device context).
-- Delivery per §5: 202 is final; retry 408/429/5xx/network with full-jitter backoff,
-  honour Retry-After, resend the identical body; derive the batch id from an
-  idempotency key with UUIDv8(SHA-256("mirafive:batch:" + UTF-8 key)) and pass every
-  case in fixtures/batch-id.cases.json.
-- Load the fixtures from a copy of this repository's fixtures/ directory; never edit
-  them, and pin their sha256 in a test.
-- The secret key is sent only as a Bearer header, never in a URL, never to a browser.
-- No transport error ever throws into the caller's code path; report through an
-  error callback and a typed error (MiraError codes: PROTOCOL §5 plus network_error,
-  timeout, aborted, invalid_event).
-- Keep dependencies at zero where the platform allows; keep the code small.
-
-Deliver: the package, its tests, a README following the family template, and a list
-of anything in PROTOCOL.md or API.md you found ambiguous.
-```
-
-## License
-
-[MIT](LICENSE) © 2026 Cloo GmbH
+- **Keys:** the public key (`mira_pk_…`) goes in browser and app code. The secret key (`mira_sk_…`)
+  goes only into the server's environment (`MIRAFIVE_SECRET_KEY`), never into client code, a
+  `NEXT_PUBLIC_`/`VITE_`/`PUBLIC_` variable or a repository. The SDKs refuse the wrong key.
+- **Money** is sent only from the server: integer minor units plus an ISO 4217 currency
+  (`amount: 1999, currency: "EUR"` is 19.99 EUR), never floats.
+- **Count once:** give money an `entryId` from the payment provider (`stripe:in_123`), so the
+  Stripe connector and retries do not double it. Give business events a stable id:
+  `eventId: await eventIdFor("order:123:paid")`. The same key gives the same id in every SDK.
+- **Personal data** never goes into event names or properties. Use your own user id (not an email)
+  for `identify`; put email, name and phone in its traits, which MIRA FIVE encrypts at rest.
+- **Consent:** keep `consent: "auto"`; it follows the site's consent banner (Usercentrics,
+  Cookiebot, consentmanager, CCM19, Borlabs, any TCF 2.2 CMP, Google Consent Mode). Call
+  `consent()` only for a custom banner. Do not gate the SDK behind consent yourself: without
+  consent it is cookieless and still counts.
+- **Never block on analytics:** event methods return nothing, never throw, and batch on their
+  own. Do not `await` or `try` them. Call `flush()`/`shutdown()` only at the end of a script or a
+  serverless function.
+- **Server events and visitors:** pass the browser's `mira.anonymousId` to your server and set it
+  as `anonymousId` on server events, so a purchase joins the visit and its source.

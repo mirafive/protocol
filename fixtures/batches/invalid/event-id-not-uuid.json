@@ -1,0 +1,9 @@
+{
+  "events": [
+    {
+      "event_id": "order-1",
+      "type": "track",
+      "event": "x"
+    }
+  ]
+}

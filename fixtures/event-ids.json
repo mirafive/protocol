@@ -1,0 +1,9 @@
+{
+  "description": "eventIdFor(key) must give these ids in every MIRA FIVE SDK, in every language: UUIDv8 from the first 122 bits of SHA-256 of the UTF-8 key.",
+  "cases": [
+    { "key": "order:123:paid", "id": "dc7e1871-544e-8ba6-bf35-0db3d8768abf" },
+    { "key": "survey:response_77", "id": "65abb77f-67f1-8ada-9aa0-0ab0e47adedd" },
+    { "key": "", "id": "e3b0c442-98fc-8c14-9afb-f4c8996fb924" },
+    { "key": "ü→🙂", "id": "4e30d08c-1c9b-8cd4-87af-24e700d3708b" }
+  ]
+}
