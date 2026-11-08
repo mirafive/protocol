@@ -1,6 +1,6 @@
 {
   "name": "@mirafive/protocol",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "description": "The MIRA FIVE wire format: event and batch types, limits, eventIdFor and the helpers every MIRA FIVE SDK shares. No dependencies.",
   "keywords": [
     "analytics",
