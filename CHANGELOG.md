@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0 — 2026-11-08
+
+### Added
+
+- `$deal_stage` and `$deal_lost`: a deal of the project's pipeline reached a stage (`deal_id`,
+  `stage`, optionally `value` in minor units of the reporting currency) or was lost (`deal_id`,
+  optionally `reason`). Types `DealStageProperties` and `DealLostProperties`, `DEAL_LIMITS`, their
+  rules in `validateEvent`, and fixtures. The MIRA FIVE ingest accepts them from secret keys only,
+  with a `user_id` or `anonymous_id`; MIRA FIVE's pipeline reads them without any mapping.
+
 ## 2.0.1 — 2026-11-08
 
 ### Fixed

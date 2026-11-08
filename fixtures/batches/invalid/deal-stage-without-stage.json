@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6c03",
+      "type": "track",
+      "event": "$deal_stage",
+      "user_id": "u",
+      "properties": {
+        "deal_id": "case_1"
+      }
+    }
+  ]
+}

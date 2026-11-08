@@ -28,6 +28,18 @@ integration, to validate batches, or to port MIRA FIVE to another language.
 | `@mirafive/protocol/fixtures/event-ids.json`                                                                               | `eventIdFor` test vectors for SDKs in other languages.                                                                                            |
 | `@mirafive/protocol/fixtures/batches/{valid,invalid}/*.json`                                                               | Batches the ingest accepts and rejects, for SDK test suites.                                                                                      |
 
+## Deal events
+
+A project's pipeline (its sales stages) can be fed by any events, mapped in MIRA FIVE's settings.
+Two built-in events need no mapping at all; send them with a secret key and a person:
+
+| Event         | Properties                                                                         | Meaning                                                                       |
+| ------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `$deal_stage` | `deal_id`, `stage`, optional `value` (whole minor units of the reporting currency) | The deal reached this stage. The latest `value` is the deal's expected value. |
+| `$deal_lost`  | `deal_id`, optional `reason`                                                       | The deal will not reach the end of the pipeline.                              |
+
+`@mirafive/node` (`dealStage`, `dealLost`), `@mirafive/convex` and `mirafive/sdk-php` send them.
+
 ## The wire in one request
 
 ```sh

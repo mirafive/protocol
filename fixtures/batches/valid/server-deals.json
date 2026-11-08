@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6c01",
+      "type": "track",
+      "event": "$deal_stage",
+      "user_id": "user_42",
+      "properties": {
+        "deal_id": "case_17",
+        "stage": "consultation_booked",
+        "value": 21900,
+        "package": "antragsservice"
+      },
+      "consent": "not_applicable"
+    },
+    {
+      "event_id": "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6c02",
+      "type": "track",
+      "event": "$deal_lost",
+      "user_id": "user_42",
+      "properties": {
+        "deal_id": "case_18",
+        "reason": "too_expensive"
+      },
+      "consent": "not_applicable"
+    }
+  ]
+}
