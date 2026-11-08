@@ -38,30 +38,8 @@ export const reservedEvents = [
   "$outbound_click",
   "$file_download",
   "$form_submit",
-  // A deal of the project's pipeline reached a stage, or was lost (secret keys only).
-  "$deal_stage",
-  "$deal_lost",
 ] as const;
 export type ReservedEvent = (typeof reservedEvents)[number];
-
-/**
- * The properties of `$deal_stage`: one deal (a case, an order, an opportunity) reached a stage
- * of the project's pipeline. `value` is what the deal is expected to be worth now, in minor units
- * of the project's reporting currency; MIRA FIVE keeps the latest. Other properties are kept.
- */
-export interface DealStageProperties {
-  deal_id: string;
-  stage: string;
-  value?: number;
-}
-
-/** The properties of `$deal_lost`: the deal will not reach the end of the pipeline. */
-export interface DealLostProperties {
-  deal_id: string;
-  reason?: string;
-}
-
-export const DEAL_LIMITS = { idLength: 200, stageLength: 120, reasonLength: 200 } as const;
 
 /** One purpose's state. `unknown`: the banner is still open, so the event is collected at tier 0. */
 export const consentStates = ["granted", "denied", "unknown"] as const;

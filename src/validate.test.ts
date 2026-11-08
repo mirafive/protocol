@@ -48,38 +48,3 @@ test("isDateTime needs seconds and an offset", () => {
   expect(isDateTime("2026-11-08T12:00:00")).toBe(false);
   expect(isDateTime("2026-02-30T12:00:00Z")).toBe(false);
 });
-
-describe("deal events", () => {
-  const deal = (event: string, properties: Record<string, unknown>, type = "track") => ({
-    event_id: "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b7c",
-    type,
-    event,
-    user_id: "user_42",
-    properties,
-  });
-
-  test("a stage needs the deal and the stage; the value is whole minor units", () => {
-    expect(
-      validateEvent(deal("$deal_stage", { deal_id: "case_1", stage: "won", value: 21900 })),
-    ).toEqual([]);
-    expect(validateEvent(deal("$deal_stage", { deal_id: "case_1" }))).toEqual([
-      { path: "properties.stage", message: "required" },
-    ]);
-    expect(
-      validateEvent(deal("$deal_stage", { deal_id: "case_1", stage: "won", value: 1.5 })),
-    ).toEqual([{ path: "properties.value", message: "expected an integer" }]);
-  });
-
-  test("a lost deal needs the deal; the reason is optional", () => {
-    expect(validateEvent(deal("$deal_lost", { deal_id: "case_1" }))).toEqual([]);
-    expect(validateEvent(deal("$deal_lost", { reason: "price" }))).toEqual([
-      { path: "properties.deal_id", message: "required" },
-    ]);
-  });
-
-  test("deal events are track events", () => {
-    expect(validateEvent(deal("$deal_lost", { deal_id: "case_1" }, "identify"))).toEqual([
-      { path: "type", message: "$deal_lost is a track event" },
-    ]);
-  });
-});

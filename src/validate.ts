@@ -8,7 +8,6 @@
  */
 import {
   billingIntervals,
-  DEAL_LIMITS,
   consentStates,
   externalIdTypes,
   LIMITS,
@@ -187,7 +186,7 @@ const properties: Check = (value, path, issues) => {
  * The rules, built on first use: nothing runs when the module loads, so bundlers drop the
  * validator from apps that never call it (the browser SDK's script tag, for one).
  */
-let built: { event: Check; touchpoint: Check; dealStage: Check; dealLost: Check } | undefined;
+let built: { event: Check; touchpoint: Check } | undefined;
 function rules() {
   if (built) return built;
   const short = string({ max: LIMITS.stringLength });
@@ -333,35 +332,15 @@ function rules() {
     ["event_id", "type", "event"],
   );
 
-  const dealId = string({ min: 1, max: DEAL_LIMITS.idLength });
-  const dealStage = object(
-    {
-      deal_id: dealId,
-      stage: string({ min: 1, max: DEAL_LIMITS.stageLength }),
-      value: integer(0, 1e15),
-    },
-    ["deal_id", "stage"],
-  );
-  const dealLost = object({ deal_id: dealId, reason: string({ max: DEAL_LIMITS.reasonLength }) }, [
-    "deal_id",
-  ]);
-
-  built = { event, touchpoint, dealStage, dealLost };
+  built = { event, touchpoint };
   return built;
 }
 
 /** Every problem the ingest would reject this event for; an empty list means it is accepted. */
 export function validateEvent(value: unknown, path = ""): Issue[] {
   const issues: Issue[] = [];
-  const { event, touchpoint, dealStage, dealLost } = rules();
+  const { event, touchpoint } = rules();
   event(value, path, issues);
-  if (isObject(value) && (value.event === "$deal_stage" || value.event === "$deal_lost")) {
-    if (value.type !== "track") {
-      issues.push({ path: join(path, "type"), message: `${value.event} is a track event` });
-    }
-    const props = isObject(value.properties) ? value.properties : {};
-    (value.event === "$deal_stage" ? dealStage : dealLost)(props, join(path, "properties"), issues);
-  }
   if (isObject(value) && value.event === "$touchpoint") {
     if (value.type !== "track") {
       issues.push({ path: join(path, "type"), message: "$touchpoint is a track event" });
