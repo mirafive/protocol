@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0 — 2026-11-09
+
+### Deprecated
+
+- `revenue.fee` and `revenue.tax`. MIRA FIVE counts revenue as the customer paid it and ignores
+  both. `validateEvent` and `validateBatch` no longer check them, and the JSON Schema no longer
+  lists them; events that still send them stay valid. They are removed in 3.0.0.
+
 ## 2.1.1 — 2026-11-08
 
 ### Removed

@@ -189,16 +189,6 @@
                 "type": "string",
                 "enum": ["charge", "subscription_payment", "refund", "dispute", "dispute_won"]
               },
-              "fee": {
-                "type": "integer",
-                "minimum": -1000000000000000,
-                "maximum": 1000000000000000
-              },
-              "tax": {
-                "type": "integer",
-                "minimum": -1000000000000000,
-                "maximum": 1000000000000000
-              },
               "refund_of": {
                 "type": "string",
                 "maxLength": 200

@@ -81,14 +81,16 @@ export type BillingInterval = (typeof billingIntervals)[number];
 
 /** Money on an event, in integer minor units. Only secret keys may send it. */
 export interface Revenue {
-  /** Gross, tax included. Negative for a refund or dispute. */
+  /** What the customer paid. Negative for a refund or dispute. */
   amount: number;
   /** ISO 4217, for example `EUR`. */
   currency: string;
   /** The provider object (`stripe:ch_123`); the ledger keeps one entry per id. */
   entry_id?: string;
   kind?: RevenueKind;
+  /** @deprecated Ignored by the server since 2.2.0, and removed in 3.0.0. */
   fee?: number;
+  /** @deprecated Ignored by the server since 2.2.0, and removed in 3.0.0. */
   tax?: number;
   refund_of?: string;
   product?: string;
