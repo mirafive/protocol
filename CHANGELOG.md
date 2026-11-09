@@ -4,8 +4,8 @@
 
 ### Removed
 
-- `$deal_stage` and `$deal_lost` from 2.1.0. A project's pipeline maps its own events to stages
-  on the MIRA FIVE server (Settings → Pipeline), so the wire format needs no deal events. 2.1.0 is
+- `$deal_stage` and `$deal_lost` from 2.1.0. A project's funnel maps its own events to stages
+  on the MIRA FIVE server (Settings → Funnel), so the wire format needs no deal events. 2.1.0 is
   deprecated; nothing else changed.
 
 ## 2.1.0 — 2026-11-08 (deprecated)
