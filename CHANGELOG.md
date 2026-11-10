@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.1 — 2026-11-10
+
+### Changed
+
+- Built and checked with oxfmt 0.78 and oxlint 1.93. The package's code, types and JSON Schema
+  are unchanged.
+
 ## 2.2.0 — 2026-11-09
 
 ### Deprecated
