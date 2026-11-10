@@ -90,7 +90,11 @@ export interface Revenue {
   kind?: RevenueKind;
   /** @deprecated Ignored by the server since 2.2.0, and removed in 3.0.0. */
   fee?: number;
-  /** @deprecated Ignored by the server since 2.2.0, and removed in 3.0.0. */
+  /**
+   * The tax (VAT, sales tax) included in `amount`, in the same minor units: 160 of a 999 payment
+   * at 19 % VAT. MRR, ROAS and payback count the amount without it. 0 for a payment without tax
+   * (reverse charge); leave it out when unknown.
+   */
   tax?: number;
   refund_of?: string;
   product?: string;

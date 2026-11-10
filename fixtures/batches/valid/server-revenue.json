@@ -24,6 +24,7 @@
         "amount": 999,
         "currency": "EUR",
         "entry_id": "stripe:in_1",
+        "tax": 160,
         "product": "premium_monthly",
         "subscription": {
           "id": "sub_1",

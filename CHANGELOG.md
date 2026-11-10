@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.0 — 2026-11-10
+
+### Changed
+
+- `revenue.tax` is back and no longer deprecated: the tax (VAT, sales tax) included in `amount`,
+  in the same minor units. MIRA FIVE reports MRR, ROAS and payback without it, and keeps what the
+  customer paid as the gross measure. `validateEvent` and `validateBatch` check it again (an
+  integer), and the JSON Schema lists it. `revenue.fee` stays deprecated.
+
 ## 2.2.1 — 2026-11-10
 
 ### Changed

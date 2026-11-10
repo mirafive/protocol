@@ -253,7 +253,8 @@ function rules() {
       currency: string({ min: 3, max: 3, hint: "an ISO 4217 code" }),
       entry_id: id,
       kind: oneOf(revenueKinds),
-      // `fee` and `tax` are deprecated: unchecked and ignored, like any other unknown key.
+      tax: minor,
+      // `fee` is deprecated: unchecked and ignored, like any other unknown key.
       refund_of: id,
       product: id,
       subscription: object(

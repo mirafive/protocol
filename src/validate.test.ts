@@ -29,15 +29,18 @@ describe("validateEvent", () => {
     ).toEqual([{ path: "revenue.amount", message: "expected an integer" }]);
   });
 
-  test("still accepts the deprecated fee and tax, unchecked", () => {
+  test("checks the tax and still accepts the deprecated fee, unchecked", () => {
+    const base = {
+      event_id: "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b7c",
+      type: "track",
+      event: "$revenue",
+    };
     expect(
-      validateEvent({
-        event_id: "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b7c",
-        type: "track",
-        event: "$revenue",
-        revenue: { amount: 1999, currency: "EUR", fee: 1.5, tax: 160 },
-      }),
+      validateEvent({ ...base, revenue: { amount: 1999, currency: "EUR", fee: 1.5, tax: 319 } }),
     ).toEqual([]);
+    expect(
+      validateEvent({ ...base, revenue: { amount: 1999, currency: "EUR", tax: 3.19 } }),
+    ).toEqual([{ path: "revenue.tax", message: "expected an integer" }]);
   });
 
   test("checks a touchpoint's properties", () => {
