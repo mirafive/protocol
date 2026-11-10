@@ -189,3 +189,35 @@ export interface BatchResult {
   duplicates: number;
   rejected: { index: number; reason: string }[];
 }
+
+/**
+ * The answer to `DELETE /v1/persons/:userId` (GDPR Art. 17), which erases one person with a secret
+ * key. The proof of the erasure, as MIRA FIVE's People page records it. Erasing a person nothing
+ * is stored about, or one already erased, succeeds with zero rows, so a retry is always safe.
+ * Events that name the erased person afterwards are refused for 30 days (`rejected` reason
+ * starts with `erased:`).
+ */
+export interface PersonErasure {
+  /** The deletion request, listed in the project's privacy log. */
+  request_id: string;
+  /** Rows deleted per table. */
+  deleted: Record<string, number>;
+  /** Revenue events kept without the person, so totals stay correct. */
+  revenue_kept: number;
+  /** ISO 8601. */
+  completed_at: string;
+}
+
+/** The `error` of a non-2xx answer of `DELETE /v1/persons/:userId`. */
+export type PersonErasureError =
+  | "missing_key"
+  | "unknown_key"
+  | "secret_key_required"
+  | "secret_key_in_browser"
+  | "invalid_user_id"
+  | "rate_limited"
+  | "erasure_failed";
+
+/** The path that erases a person; `userId` is encoded, so an email or a slash is safe. */
+export const personErasurePath = (userId: string): string =>
+  `/v1/persons/${encodeURIComponent(userId)}`;

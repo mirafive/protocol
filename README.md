@@ -41,6 +41,22 @@ The answer is `{ "accepted": 1, "duplicates": 0, "rejected": [] }`. Events are c
 one, so a bad event never sinks the batch; resend a batch with the same `event_id`s and it counts
 once.
 
+## Erasing a person (GDPR Art. 17)
+
+A server erases one person with its secret key, with the same effect as the dashboard's People
+page:
+
+```sh
+curl -X DELETE https://events.mirafive.io/v1/persons/user_42 \
+  -H "Authorization: Bearer $MIRAFIVE_SECRET_KEY"
+```
+
+The answer (`PersonErasure`) is the proof: `{ "request_id": "…", "deleted": { "events": 12, … },
+"revenue_kept": 1, "completed_at": "…" }`. Revenue stays in the totals, without the person. Erasing
+a person nothing is stored about succeeds with zero rows, so a retry is always safe. Events that
+name the person afterwards are refused for 30 days (`rejected` reason starting with `erased:`).
+A public key gets `403 secret_key_required`. `personErasurePath(userId)` builds the path.
+
 ## For AI coding assistants
 
 Rules for integrating MIRA FIVE correctly. They hold for every MIRA FIVE SDK.

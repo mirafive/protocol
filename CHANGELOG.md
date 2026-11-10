@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.0 — 2026-11-10
+
+### Added
+
+- `PersonErasure`, `PersonErasureError` and `personErasurePath`: the types and the path of
+  `DELETE /v1/persons/:userId`, which erases one person with a secret key (GDPR Art. 17). The
+  server SDKs expose it as `deletePerson`. Events that name an erased person are refused for 30
+  days (a `rejected` reason starting with `erased:`).
+
 ## 2.2.1 — 2026-11-10
 
 ### Changed
