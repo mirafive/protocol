@@ -12,6 +12,7 @@ import {
   trimHost,
 } from "./helpers";
 import { cleanExternalIds, cleanProperties } from "./properties";
+import { personErasurePath } from "./wire";
 
 describe("eventIdFor", () => {
   test.each(fixtures.cases)("$key gives the shared fixture id", async ({ key, id }) => {
@@ -116,5 +117,12 @@ describe("cleanExternalIds", () => {
     ).toEqual({ stripe_customer: "cus_1" });
     expect(cleanExternalIds({ stripe_customer: " " })).toBeUndefined();
     expect(cleanExternalIds(null)).toBeUndefined();
+  });
+});
+
+describe("personErasurePath", () => {
+  test("encodes the user id as one path segment", () => {
+    expect(personErasurePath("cust-1")).toBe("/v1/persons/cust-1");
+    expect(personErasurePath("a/b@c.de ")).toBe("/v1/persons/a%2Fb%40c.de%20");
   });
 });
