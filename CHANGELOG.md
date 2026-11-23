@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.4.0 — 2026-11-23
+
+### Added
+
+- `WireEvent.page_event_id`, also in the JSON Schema: an `$engagement` event names the `event_id`
+  of the pageview it measures, and the server attaches it to that pageview's visit for up to 24
+  hours (a tab shown again after an hour). Optional and only a hint: the JSON Schema describes the
+  expected UUID, while the ingest drops a malformed id and keeps the event, so `validateEvent`
+  reports no problem for one. Servers before this field ignore it.
+
 ## 2.3.0 — 2026-11-10
 
 ### Added
