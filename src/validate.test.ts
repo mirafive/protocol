@@ -40,6 +40,19 @@ describe("validateEvent", () => {
     ).toEqual([]);
   });
 
+  test("page_event_id is a hint: a malformed one is no problem, as the ingest drops it", () => {
+    const engagement = {
+      event_id: "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b7c",
+      type: "track",
+      event: "$engagement",
+    };
+    expect(
+      validateEvent({ ...engagement, page_event_id: "0192d4a8-7b1c-7e8a-9c1d-2b3e4f5a6b01" }),
+    ).toEqual([]);
+    expect(validateEvent({ ...engagement, page_event_id: "not-a-uuid" })).toEqual([]);
+    expect(validateEvent({ ...engagement, page_event_id: 7 })).toEqual([]);
+  });
+
   test("checks a touchpoint's properties", () => {
     expect(
       validateEvent({

@@ -164,6 +164,12 @@ export interface WireEvent {
   user_id?: string;
   session_id?: string;
   group_id?: string;
+  /**
+   * `$engagement` only: the `event_id` of the pageview it measures. The server attaches the
+   * engagement to that pageview's visit for up to 24 hours (a tab shown again after an hour). Only a hint: the
+   * server drops a malformed id and keeps the event, and older servers ignore the field.
+   */
+  page_event_id?: string;
   properties?: Properties;
   traits?: Properties;
   external_ids?: ExternalIds;
