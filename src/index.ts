@@ -19,5 +19,6 @@ export {
   type ConsentInput,
 } from "./helpers";
 export { cleanExternalIds, cleanProperties } from "./properties";
+export { piiKinds, redactPii, type PiiBlank, type PiiCounts, type PiiKind } from "./pii";
 export { uuidv7 } from "./uuid";
 export { isDateTime, validateBatch, validateEvent, type Issue } from "./validate";

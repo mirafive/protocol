@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.5.0 — 2026-11-27
+
+### Added
+
+- `redactPii(text, blank?)`: finds emails, IBANs, phone numbers and payment card numbers in free
+  text and returns the text with each match blanked (`[redacted:<kind>]` by default, or what
+  `blank(kind, match)` returns) and the number of matches per kind. These are the patterns of the
+  MIRA FIVE ingest's PII guard, which uses the same function, so a browser can blank personal data
+  before it sends or records anything. Runs in time linear in the text's length on any input.
+  A card number is 13 to 19 digits, plain or grouped by spaces or dashes, with a card network's
+  prefix and length, that passes the Luhn check; a match that lies wholly inside a UUID is kept.
+- `piiKinds` (`email`, `iban`, `phone`, `card`) and the types `PiiKind`, `PiiCounts` and
+  `PiiBlank`.
+
 ## 2.4.0 — 2026-11-23
 
 ### Added
