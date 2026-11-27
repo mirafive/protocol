@@ -62,14 +62,16 @@ const findEmail: Find = (text, from) => {
   return undefined;
 };
 
-/** A global regular expression as a finder. */
-const findPattern =
-  (pattern: RegExp): Find =>
-  (text, from) => {
-    pattern.lastIndex = from;
-    const match = pattern.exec(text);
-    return match ? [match.index, match.index + match[0].length] : undefined;
-  };
+/**
+ * The next match of a global regular expression from `from`. Called from arrow functions in
+ * `passes` rather than returning one: a call at the top of the module would keep this file in every
+ * bundle that imports the package, used or not.
+ */
+const findPattern = (pattern: RegExp, text: string, from: number): ReturnType<Find> => {
+  pattern.lastIndex = from;
+  const match = pattern.exec(text);
+  return match ? [match.index, match.index + match[0].length] : undefined;
+};
 
 /**
  * IBANs: two letters, two check digits, 11–30 alphanumerics, optionally in groups of four. A
@@ -248,10 +250,10 @@ function insideId(spans: readonly Span[], start: number, end: number): boolean {
  */
 const passes: readonly [kind: PiiKind, find: Find][] = [
   ["email", findEmail],
-  ["iban", findPattern(iban)],
+  ["iban", (text, from) => findPattern(iban, text, from)],
   ["card", findCard],
-  ["phone", findPattern(internationalPhone)],
-  ["phone", findPattern(nationalPhone)],
+  ["phone", (text, from) => findPattern(internationalPhone, text, from)],
+  ["phone", (text, from) => findPattern(nationalPhone, text, from)],
 ];
 
 const token: PiiBlank = (kind) => `[redacted:${kind}]`;
