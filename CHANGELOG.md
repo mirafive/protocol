@@ -13,6 +13,20 @@
   prefix and length, that passes the Luhn check; a match that lies wholly inside a UUID is kept.
 - `piiKinds` (`email`, `iban`, `phone`, `card`) and the types `PiiKind`, `PiiCounts` and
   `PiiBlank`.
+- The wire format of session recordings, which the MIRA FIVE ingest speaks from now on:
+  - `BatchAnswer`: the `202` of `/v1/batch` and `/v1/p` may carry a `replay` field
+    (`ReplayAnswer`: `session_id`, `masking`, `never_record`, `sensitive`) when the server records
+    the session. Additive: an SDK that reads only `response.ok` is not affected.
+    `readReplayAnswer(body)` reads it from an answer body as the ingest's schema would, or returns
+    `undefined`.
+  - `ChunkQuery` and `replayChunkUrl(host, query)`: a chunk, `POST /v1/replay?…` with the gzip of
+    the rrweb events as its body; `WithdrawQuery` and `replayWithdrawUrl(host, query)`: consent was
+    withdrawn, `POST /v1/replay/withdraw?…`. Both are CORS simple requests.
+  - `REPLAY_LIMITS` (chunk size, what a beacon carries, pages per chunk, sequence, time spans),
+    `maskingModes` (`standard`, `strict`), `chunkRefusals` (the reasons of a `409`), `isGzip`.
+  - `matchesPage(pattern, path)` and `matchesAnyPage(patterns, path)`: the page patterns of
+    `never_record` and `sensitive`, where `*` stands for any run of characters and a pattern
+    matches the whole `location.pathname`.
 
 ## 2.4.0 — 2026-11-23
 
