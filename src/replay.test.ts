@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   isGzip,
+  isTabId,
   matchesAnyPage,
   matchesPage,
   readReplayAnswer,
@@ -75,6 +76,7 @@ describe("URLs", () => {
       replayChunkUrl("https://events.example", {
         key: "mira_pk_1",
         session: SESSION,
+        tab: "Xk2_9-pQr7Ta",
         seq: 3,
         start: 1,
         end: 2,
@@ -90,6 +92,7 @@ describe("URLs", () => {
     expect(url.searchParams.get("anonymous_id")).toBe("a 1");
     expect(url.searchParams.has("user_id")).toBe(false);
     expect(url.searchParams.get("seq")).toBe("3");
+    expect(url.searchParams.get("tab")).toBe("Xk2_9-pQr7Ta");
   });
 
   test("a withdrawal's URL", () => {
@@ -97,6 +100,21 @@ describe("URLs", () => {
       `https://e.example/v1/replay/withdraw?key=k&session=${SESSION}`,
     );
   });
+});
+
+test("a tab id is 8 to 32 characters of base64url", () => {
+  for (const good of ["abcdefgh", "A-_09zZy", "x".repeat(32)]) expect(isTabId(good)).toBe(true);
+  for (const bad of [
+    "",
+    "abcdefg",
+    "x".repeat(33),
+    "abcd/efg",
+    "abcd.efg",
+    "abcdefg\n",
+    "abcd=efg",
+  ]) {
+    expect(isTabId(bad)).toBe(false);
+  }
 });
 
 test("isGzip knows a gzip member by its header", () => {

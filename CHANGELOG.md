@@ -20,9 +20,12 @@
     `readReplayAnswer(body)` reads it from an answer body as the ingest's schema would, or returns
     `undefined`.
   - `ChunkQuery` and `replayChunkUrl(host, query)`: a chunk, `POST /v1/replay?…` with the gzip of
-    the rrweb events as its body; `WithdrawQuery` and `replayWithdrawUrl(host, query)`: consent was
+    the rrweb events as its body. A recording is one stream per tab: each chunk names its `tab`
+    (`TAB_ID`, `isTabId`: 8 to 32 characters of base64url, made at random per tab) and its `seq`
+    counts from 0 in that tab; `WithdrawQuery` and `replayWithdrawUrl(host, query)`: consent was
     withdrawn, `POST /v1/replay/withdraw?…`. Both are CORS simple requests.
-  - `REPLAY_LIMITS` (chunk size, what a beacon carries, pages per chunk, sequence, time spans),
+  - `REPLAY_LIMITS` (chunk size, what a beacon carries, pages per chunk, tabs per session,
+    sequence, time spans),
     `maskingModes` (`standard`, `strict`), `chunkRefusals` (the reasons of a `409`), `isGzip`.
   - `matchesPage(pattern, path)` and `matchesAnyPage(patterns, path)`: the page patterns of
     `never_record` and `sensitive`, where `*` stands for any run of characters and a pattern

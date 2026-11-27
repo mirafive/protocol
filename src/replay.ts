@@ -16,7 +16,9 @@ export const REPLAY_LIMITS = {
   pagesPerChunk: 20,
   /** Characters of one page path. */
   pathLength: 512,
-  /** The highest sequence number of a session. */
+  /** The most tabs one session records in; a chunk of a further tab is refused. */
+  tabsPerSession: 20,
+  /** The highest sequence number of a session's tab. */
   maxSequence: 100_000,
   /** The longest time one chunk may cover, in ms. */
   chunkSpanMs: 60 * 60 * 1000,
@@ -106,6 +108,18 @@ export function readReplayAnswer(body: unknown): ReplayAnswer | undefined {
 }
 
 /**
+ * A tab's id in a recording: 8 to 32 characters of `A`–`Z`, `a`–`z`, `0`–`9`, `_` and `-` (the
+ * alphabet of base64url). The recorder makes one per tab at random and keeps it for the tab's
+ * documents; the server makes it a segment of the chunk's storage key, so nothing else passes.
+ */
+export const TAB_ID = /^[A-Za-z0-9_-]{8,32}$/;
+
+/** Whether `value` is a tab id (`TAB_ID`). */
+export function isTabId(value: string): boolean {
+  return TAB_ID.test(value);
+}
+
+/**
  * The query string of a chunk, `POST /v1/replay?…`. Everything rides in the URL, because the body
  * is the gzip of the recording (a JSON array of rrweb events) and a header would cost a CORS
  * preflight.
@@ -115,7 +129,12 @@ export interface ChunkQuery {
   key: string;
   /** The `session_id` of the `replay` field. */
   session: string;
-  /** 0 for the session's first chunk, then +1 per chunk, across a tab's pages; a retry sends the same. */
+  /**
+   * The tab the chunk was recorded in (`TAB_ID`): a recording is one stream per tab, since two
+   * tabs of one visit share the session.
+   */
+  tab: string;
+  /** 0 for the tab's first chunk of the session, then +1 per chunk, across the tab's pages; a retry sends the same. */
   seq: number;
   /** The time of the chunk's first and last recorded event, epoch ms on the browser's clock. */
   start: number;

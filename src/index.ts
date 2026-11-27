@@ -23,6 +23,7 @@ export { piiKinds, redactPii, type PiiBlank, type PiiCounts, type PiiKind } from
 export {
   chunkRefusals,
   isGzip,
+  isTabId,
   maskingModes,
   matchesAnyPage,
   matchesPage,
@@ -30,6 +31,7 @@ export {
   REPLAY_LIMITS,
   replayChunkUrl,
   replayWithdrawUrl,
+  TAB_ID,
   type BatchAnswer,
   type ChunkQuery,
   type ChunkRefusal,
