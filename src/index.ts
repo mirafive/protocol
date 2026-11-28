@@ -39,5 +39,15 @@ export {
   type ReplayAnswer,
   type WithdrawQuery,
 } from "./replay";
+export {
+  readSignalsAnswer,
+  SIGNAL_LIMITS,
+  SIGNAL_RULES,
+  SIGNAL_TIER,
+  signalEvents,
+  type SignalEvent,
+  type SignalRules,
+  type SignalsAnswer,
+} from "./signals";
 export { uuidv7 } from "./uuid";
 export { isDateTime, validateBatch, validateEvent, type Issue } from "./validate";
