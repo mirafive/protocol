@@ -1,5 +1,36 @@
 # Changelog
 
+## 2.5.0 — 2026-11-27
+
+### Added
+
+- `redactPii(text, blank?)`: finds emails, IBANs, phone numbers and payment card numbers in free
+  text and returns the text with each match blanked (`[redacted:<kind>]` by default, or what
+  `blank(kind, match)` returns) and the number of matches per kind. These are the patterns of the
+  MIRA FIVE ingest's PII guard, which uses the same function, so a browser can blank personal data
+  before it sends or records anything. Runs in time linear in the text's length on any input.
+  A card number is 13 to 19 digits, plain or grouped by spaces or dashes, with a card network's
+  prefix and length, that passes the Luhn check; a match that lies wholly inside a UUID is kept.
+- `piiKinds` (`email`, `iban`, `phone`, `card`) and the types `PiiKind`, `PiiCounts` and
+  `PiiBlank`.
+- The wire format of session recordings, which the MIRA FIVE ingest speaks from now on:
+  - `BatchAnswer`: the `202` of `/v1/batch` and `/v1/p` may carry a `replay` field
+    (`ReplayAnswer`: `session_id`, `masking`, `never_record`, `sensitive`) when the server records
+    the session. Additive: an SDK that reads only `response.ok` is not affected.
+    `readReplayAnswer(body)` reads it from an answer body as the ingest's schema would, or returns
+    `undefined`.
+  - `ChunkQuery` and `replayChunkUrl(host, query)`: a chunk, `POST /v1/replay?…` with the gzip of
+    the rrweb events as its body. A recording is one stream per tab: each chunk names its `tab`
+    (`TAB_ID`, `isTabId`: 8 to 32 characters of base64url, made at random per tab) and its `seq`
+    counts from 0 in that tab; `WithdrawQuery` and `replayWithdrawUrl(host, query)`: consent was
+    withdrawn, `POST /v1/replay/withdraw?…`. Both are CORS simple requests.
+  - `REPLAY_LIMITS` (chunk size, what a beacon carries, pages per chunk, tabs per session,
+    sequence, time spans),
+    `maskingModes` (`standard`, `strict`), `chunkRefusals` (the reasons of a `409`), `isGzip`.
+  - `matchesPage(pattern, path)` and `matchesAnyPage(patterns, path)`: the page patterns of
+    `never_record` and `sensitive`, where `*` stands for any run of characters and a pattern
+    matches the whole `location.pathname`.
+
 ## 2.4.0 — 2026-11-23
 
 ### Added

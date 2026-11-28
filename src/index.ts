@@ -19,5 +19,25 @@ export {
   type ConsentInput,
 } from "./helpers";
 export { cleanExternalIds, cleanProperties } from "./properties";
+export { piiKinds, redactPii, type PiiBlank, type PiiCounts, type PiiKind } from "./pii";
+export {
+  chunkRefusals,
+  isGzip,
+  isTabId,
+  maskingModes,
+  matchesAnyPage,
+  matchesPage,
+  readReplayAnswer,
+  REPLAY_LIMITS,
+  replayChunkUrl,
+  replayWithdrawUrl,
+  TAB_ID,
+  type BatchAnswer,
+  type ChunkQuery,
+  type ChunkRefusal,
+  type MaskingMode,
+  type ReplayAnswer,
+  type WithdrawQuery,
+} from "./replay";
 export { uuidv7 } from "./uuid";
 export { isDateTime, validateBatch, validateEvent, type Issue } from "./validate";

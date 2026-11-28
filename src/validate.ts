@@ -29,7 +29,8 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 const join = (path: string, key: string | number) => (path ? `${path}.${key}` : String(key));
 
-const UUID =
+/** A UUID as the ingest's schema accepts it (Zod's `uuid`): version 1 to 8, nil and max. */
+export const UUID =
   /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/;
 const DATETIME =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|([+-])(\d{2}):(\d{2}))$/;
