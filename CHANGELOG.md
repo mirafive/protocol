@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.6.0 — unreleased
+
+### Added
+
+- Behavior signals, which the MIRA FIVE ingest stores from now on as ordinary events of every
+  visit, not billed and starting no visit:
+  - `signalEvents` (`$rage_click`, `$dead_click`, `$form_abandon`, `$error`, `$slow_page`):
+    reserved `track` events that only MIRA FIVE's SDKs send.
+  - `BatchAnswer` may carry a `signals` field (`SignalsAnswer`: `consent`, `masking`,
+    `sensitive`, `rules`) when the project detects signals; `readSignalsAnswer(body)` reads it as
+    the ingest's schema would. Additive, like `replay`.
+  - `SIGNAL_RULES` (the definitions' numbers, the defaults of the `rules` the server sends),
+    `SIGNAL_LIMITS` (caps per page, document and session; text lengths) and `SIGNAL_TIER` (0: no
+    consent needed).
+
 ## 2.5.0 — 2026-11-27
 
 ### Added

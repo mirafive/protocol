@@ -1,4 +1,5 @@
 import { UUID } from "./validate";
+import type { SignalsAnswer } from "./signals";
 import type { BatchResult, ConsentState } from "./wire";
 
 /**
@@ -82,9 +83,13 @@ export interface ReplayAnswer {
   sensitive: string[];
 }
 
-/** The body of a batch's `202`: `BatchResult` and, for a recorded session, `replay`. */
+/**
+ * The body of a batch's `202`: `BatchResult`, for a recorded session `replay`, and for a project
+ * that detects behavior signals `signals` (signals.ts).
+ */
 export interface BatchAnswer extends BatchResult {
   replay?: ReplayAnswer;
+  signals?: SignalsAnswer;
 }
 
 const strings = (value: unknown): value is string[] =>
